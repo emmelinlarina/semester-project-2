@@ -4,10 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "dev": "tailwindcss -i ./src/input.css -o ./css/styles.css --watch",
-  "build": "tailwindcss -i ./src/input.css -o ./css/styles.css --minify"
-}
-,
+    "dev": "tailwindcss -c ./tailwind.config.js -i  ./src/input.css -o ./css/styles.css --watch",
+    "build": "tailwindcss -c ./tailwind.config.js -i ./src/input.css -o ./css/styles.css --minify"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/emmelinlarina/semester-project-2.git"

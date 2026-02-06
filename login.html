@@ -14,5 +14,75 @@
 
     <link rel="stylesheet" href="css/styles.css" />
   </head>
-  <body></body>
+
+  <body class="min-h-screen bg-white-50 text-zinc-800">
+    <main class="mx-auto max-w-md px-4 py-12">
+      <a
+        href="./index.html"
+        aria-label="Go back to home page"
+        class="inline-flex items-center gap-2 text-sm text-zinc-300 hover:text-white"
+      >
+        <i class="fa-solid fa-arrow-left"></i>
+      </a>
+
+      <header class="mt-6">
+        <h1 class="text-3xl font-bold tracking-tight">Welcome back!</h1>
+      </header>
+
+      <section class="mt-8">
+        <form id="loginForm" class="grid gap-4" novalidate>
+          <div class="grid gap-2">
+            <label for="email" class="text-sm font-medium">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              autocomplete="email"
+              required
+              class="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-brown-500 focus:outline-none focus:ring-1 focus:ring-brown-500"
+              placeholder="name@student.noroff.no"
+              45
+            />
+          </div>
+
+          <div class="grid gap-2">
+            <label for="password" class="text-sm font-medium">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              autocomplete="current-password"
+              required
+              class="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-brown-500 focus:outline-none focus:ring-1 focus:ring-brown-500"
+              placeholder="••••••••"
+            />
+          </div>
+
+          <div
+            id="loginError"
+            class="hidden rounded-xl border border-brand-700/30 bg-brand-700/10 p-4 text-brand-700 px-4 py-3 text-sm"
+            role="alert"
+          ></div>
+
+          <button
+            type="submit"
+            class="mt-2 inline-flex w-full items-center justify-center rounded-md bg-brand-700 px-4 py-3 text-sm font-semibold text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-700 focus:ring-offset-2"
+          >
+            Log in
+          </button>
+
+          <p class="text-center text-sm text-zinc-300">
+            Don't have an account?
+            <a
+              href="./register.html"
+              class="font-medium text-brand-700 hover:text-brand-600"
+              >Sign up</a
+            >
+          </p>
+        </form>
+      </section>
+    </main>
+
+    <script type="module" src="./script/pages/login.js"></script>
+  </body>
 </html>
