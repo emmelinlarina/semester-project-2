@@ -3,8 +3,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["Poppins", "sans-serif"],
-        serif: ["Radley", "Rasa", "serif"],
+        radley: ["Radley", "serif"],
+        rasa: ["Rasa", "serif"],
       },
     },
   },

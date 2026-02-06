@@ -1,7 +1,14 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-600: #845a6d;
+  --color-brand-600: #b592a1;
   --color-brand-700: #3e1929;
   --color-brown-500: #78350f;
+  
+  --font-radley: "Radley", serif;
+  --font-rasa: "Rasa", serif;
+}
+
+@apply {
+    button cursor-pointer
 }
