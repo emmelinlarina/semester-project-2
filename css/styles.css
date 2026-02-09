@@ -10,6 +10,7 @@
       "Courier New", monospace;
     --color-red-600: oklch(57.7% 0.245 27.325);
     --color-red-700: oklch(50.5% 0.213 27.518);
+    --color-green-700: oklch(52.7% 0.154 150.069);
     --color-zinc-300: oklch(87.1% 0.006 286.286);
     --color-zinc-700: oklch(37% 0.013 285.805);
     --color-zinc-800: oklch(27.4% 0.006 286.033);
@@ -257,6 +258,24 @@
       border-color: color-mix(in oklab, var(--color-brand-700) 30%, transparent);
     }
   }
+  .border-green-700 {
+    border-color: var(--color-green-700);
+  }
+  .border-green-700\/30 {
+    border-color: color-mix(in srgb, oklch(52.7% 0.154 150.069) 30%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      border-color: color-mix(in oklab, var(--color-green-700) 30%, transparent);
+    }
+  }
+  .border-red-700 {
+    border-color: var(--color-red-700);
+  }
+  .border-red-700\/30 {
+    border-color: color-mix(in srgb, oklch(50.5% 0.213 27.518) 30%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      border-color: color-mix(in oklab, var(--color-red-700) 30%, transparent);
+    }
+  }
   .border-transparent {
     border-color: transparent;
   }
@@ -270,6 +289,24 @@
     background-color: color-mix(in srgb, #3e1929 10%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
       background-color: color-mix(in oklab, var(--color-brand-700) 10%, transparent);
+    }
+  }
+  .bg-green-700 {
+    background-color: var(--color-green-700);
+  }
+  .bg-green-700\/10 {
+    background-color: color-mix(in srgb, oklch(52.7% 0.154 150.069) 10%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-green-700) 10%, transparent);
+    }
+  }
+  .bg-red-700 {
+    background-color: var(--color-red-700);
+  }
+  .bg-red-700\/10 {
+    background-color: color-mix(in srgb, oklch(50.5% 0.213 27.518) 10%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-red-700) 10%, transparent);
     }
   }
   .bg-white {
@@ -339,6 +376,12 @@
   }
   .text-brand-700 {
     color: var(--color-brand-700);
+  }
+  .text-green-700 {
+    color: var(--color-green-700);
+  }
+  .text-red-700 {
+    color: var(--color-red-700);
   }
   .text-white {
     color: var(--color-white);
