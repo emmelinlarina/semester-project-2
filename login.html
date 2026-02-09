@@ -12,7 +12,7 @@
       crossorigin="anonymous"
     ></script>
 
-    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="./css/styles.css" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -22,12 +22,12 @@
     />
   </head>
 
-  <body class="min-h-screen bg-white-50 text-zinc-800 font-radley">
+  <body class="min-h-screen bg-white text-zinc-800 font-radley">
     <main class="mx-auto max-w-md px-4 py-12">
       <a
         href="./index.html"
         aria-label="Go back to home page"
-        class="inline-flex items-center gap-2 text-sm text-zinc-300 hover:text-white"
+        class="inline-flex items-center gap-2 text-sm text-zinc-700 hover:text-brand-700"
       >
         <i class="fa-solid fa-arrow-left"></i>
       </a>
@@ -48,7 +48,6 @@
               required
               class="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-brown-500 focus:outline-none focus:ring-1 focus:ring-brown-500"
               placeholder="name@student.noroff.no"
-              45
             />
           </div>
 
@@ -67,18 +66,18 @@
 
           <div
             id="loginError"
-            class="hidden rounded-xl border border-brand-700/30 bg-brand-700/10 p-4 text-brand-700 px-4 py-3 text-sm"
+            class="hidden rounded-xl border border-brand-700/30 bg-brand-700/10 text-brand-700 px-4 py-3 text-sm"
             role="alert"
           ></div>
 
           <button
             type="submit"
-            class="mt-2 inline-flex w-full items-center justify-center rounded-md bg-brand-700 px-4 py-3 text-xl font-semibold font-rasa text-white hover:bg-brand-600 hover:text-brand-700 hover:border-brand-700 focus:ring-2 focus:bg-brand-600 focus:ring-offset-2 tracking-wider"
+            class="mt-2 inline-flex w-full items-center justify-center rounded-md bg-brand-700 px-4 py-3 text-xl font-semibold font-rasa text-white hover:bg-brand-600 hover:text-brand-700 border-transparent hover:border-brand-700 focus:ring-2 focus:ring-brand-700 focus:ring-offset-2 tracking-wider"
           >
             LOGIN
           </button>
 
-          <p class="text-center text-sm text-zinc-300">
+          <p class="text-center text-sm text-zinc-700">
             Don't have an account?
             <a
               href="./register.html"
