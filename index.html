@@ -12,7 +12,7 @@
       crossorigin="anonymous"
     ></script>
 
-    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="./css/styles.css" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -21,7 +21,52 @@
       rel="stylesheet"
     />
   </head>
-  <body class="font-serif">
-    <h1 class="text-3xl font">Tailwind lives!!</h1>
+  <body class="bg-white text-zinc-900 font-radley">
+    <header class="border-b border-zinc-200 bg-white">
+      <nav
+        class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4"
+      >
+        <div class="flex items-center gap-3">
+          <a
+            href="./index.html"
+            class="rounded-full bg-zinc-200 px-5 py-1 text-xl tracking-wide"
+          >
+            AUCTION HOUSE
+          </a>
+          <button
+            type="button"
+            class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-zinc-200 hover:bg-zinc-300 transition"
+            aria-label="Search"
+          >
+            <i class="fas fa-search"></i>
+          </button>
+          <a
+            id="navCreate"
+            href="./create-listing.html"
+            class="hidden h-10 w-10 items-center justify-center rounded-full bg-zinc-200 hover:bg-zinc-300 transition"
+            aria-label="Create listing"
+          >
+            <i class="fas fa-plus"></i>
+          </a>
+        </div>
+        <div
+          class="flex items-center gap-2 h-10 justify-center rounded-full bg-zinc-200 px-5 text-sm hover:bg-zinc-300 transition"
+        >
+          <a
+            href="./login.html"
+            class="inline-flex h-10 items-center justify-center rounded-full px-5 text-sm hover:font-extrabold"
+            aria-label="Log in"
+            >LOG IN
+          </a>
+          |
+          <a
+            href="./register.html"
+            class="inline-flex h-10 items-center justify-center rounded-full px-5 text-sm hover:font-extrabold"
+            aria-label="Sign up"
+            >SIGN UP
+          </a>
+        </div>
+      </nav>
+    </header>
   </body>
 </html>
