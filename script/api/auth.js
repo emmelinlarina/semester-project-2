@@ -1,33 +1,15 @@
 import { getToken, getApiKey, setApiKey } from "../utils/storage.js";
-
-const BASE = "https://v2.api.noroff.dev";
-
-async function request(endpoint, options = {}) {
-  const response = await fetch(`${BASE}/${endpoint}`, {
-    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
-    ...options,
-  });
-
-  const json = await response.json().catch(() => ({}));
-
-  if (!response.ok) {
-    const msg =
-      json?.errors?.[0]?.message || json?.message || "An error occurred";
-    throw new Error(msg);
-  }
-
-  return json;
-}
+import { apiFetch } from "./api-fetch.js";
 
 export function register({ name, email, password }) {
-  return request("auth/register", {
+  return apiFetch("auth/register", {
     method: "POST",
     body: JSON.stringify({ name, email, password }),
   });
 }
 
 export function login({ email, password }) {
-  return request("auth/login", {
+  return apiFetch("auth/login", {
     method: "POST",
     body: JSON.stringify({ email, password }),
   });
@@ -40,7 +22,7 @@ export async function ensureAPIKey() {
   const token = getToken();
   if (!token) throw new Error("Missing token. Please log in again.");
 
-  const res = await request("auth/create-api-key", {
+  const res = await apiFetch("auth/create-api-key", {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
   });

@@ -1,8 +1,11 @@
 import { getToken, getProfile, logout } from "../utils/storage.js";
+import { getListings } from "../api/listings.js";
+import { ensureAPIKey } from "../api/auth.js";
 
 const menuBtn = document.getElementById("navMenu");
 const mobileMenu = document.getElementById("mobileMenu");
 
+//navbar elements
 const navCreate = document.getElementById("navCreate");
 const navLoggedOut = document.getElementById("navLoggedOut");
 const navLoggedIn = document.getElementById("navLoggedIn");
@@ -15,8 +18,12 @@ const mobileCreditsTop = document.getElementById("mobileCreditsTop");
 
 const logoutBtn = document.getElementById("logoutBtn");
 const mobileLogoutBtn = document.getElementById("mobileLogoutBtn");
-
 const mobileProfileIcon = document.getElementById("mobileProfileIcon");
+
+// feed
+const hightlightedGrid = document.getElementById("highlightedGrid");
+const galleryGrid = document.getElementById("galleryGrid");
+const sortSelect = document.getElementById("sortSelect");
 
 // Hamburger toggle
 menuBtn?.addEventListener("click", () => {
@@ -25,6 +32,7 @@ menuBtn?.addEventListener("click", () => {
   menuBtn.setAttribute("aria-expanded", String(!isOpen));
 });
 
+//navbar icons
 function updateNav() {
   const token = getToken();
   const profile = getProfile();
@@ -76,5 +84,102 @@ function doLogout() {
 
 logoutBtn?.addEventListener("click", doLogout);
 mobileLogoutBtn?.addEventListener("click", doLogout);
+
+// feed
+let listings = [];
+
+function getHighestBid(listing) {
+  const bids = listing.bids ?? [];
+  return bids.reduce((max, bid) => (bid.amount > max ? bid.amount : max), 0);
+}
+
+function timeLeft(endTime) {
+  const end = new Date(endTime);
+  const diff = end - Date.now();
+  if (diff <= 0) return "Ended";
+
+  const mins = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(hours / 24);
+
+  if (days > 0) return `${days}d ${hours % 24}h`;
+  if (hours > 0) return `${hours}h ${mins % 60}m`;
+  return `${mins}m`;
+}
+
+function cardTemplate(listing) {
+  const title = listing?.title ?? "Untitled";
+  const description = listing?.description ?? "";
+  const bid = getHighestBid(listing);
+  const time = timeLeft(listing?.endsAt);
+  const image =
+    listing?.media?.length > 0 && listing.media[0].url
+      ? listing.media[0].url
+      : "https://via.placeholder.com/400x300?text=No+Image";
+
+  return ` 
+    <a href="./listing.html?id=${listing.id}" class="block rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
+      <img src="${image}" alt="${title}" class="w-full h-48 object-cover">
+      <div class="p-4">
+        <h3 class="text-lg font-semibold mb-2">${title}</h3>
+        <p class="text-sm text-gray-600 mb-4">${description}</p>
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-bold">${bid} $</span>
+          <span class="text-xs text-gray-500">${time}</span>
+        </div>
+      </div>
+    </a>
+  `;
+}
+
+function renderGrid(el, items) {
+  if (!el) return;
+  el.innerHTML = items.map(cardTemplate).join("");
+}
+
+function sortListings(listings, sortBy) {
+  const sorted = [...listings];
+
+  switch (sortBy) {
+    case "endsLate":
+      return sorted.sort((a, b) => new Date(b.endsAt) - new Date(a.endsAt));
+    case "endsSoon":
+      return sorted.sort((a, b) => new Date(a.endsAt) - new Date(b.endsAt));
+    case "newest":
+      return sorted.sort((a, b) => new Date(b.created) - new Date(a.created));
+    case "oldest":
+      return sorted.sort((a, b) => new Date(a.created) - new Date(b.created));
+  }
+}
+
+function pickHighlighted(items) {
+  return [...items]
+    .sort((a, b) => getHighestBid(b) - getHighestBid(a))
+    .slice(0, 3);
+}
+
+async function initFeed() {
+  try {
+    await ensureAPIKey();
+
+    const res = await getListings({ limit: 100, active: true });
+    listings = res?.data ?? [];
+
+    renderGrid(hightlightedGrid, pickHighlighted(listings));
+    renderGrid(
+      galleryGrid,
+      sortListings(listings, sortSelect?.value || "endsSoon"),
+    );
+  } catch (err) {
+    console.error("Error loading listings:", err);
+    if (galleryGrid) galleryGrid.innerHTML = "<p>Error loading listings.</p>";
+  }
+}
+
+sortSelect?.addEventListener("change", () => {
+  renderGrid(galleryGrid, sortListings(listings, sortSelect.value));
+});
+
+initFeed();
 
 updateNav();

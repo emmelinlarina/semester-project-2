@@ -181,6 +181,56 @@
       </nav>
     </header>
 
+    <!-- brand / img -->
+    <main class="mx-auto max-w-6xl px-4 py-8 font-rasa">
+      <section
+        class="rounded-3xl bg-zinc-100 border border-zinc-200 flex flex-col items-start justify-center px-6 py-4"
+      >
+        <h1 class="text-3xl sm:text-4xl md:text-5xl tracking-wide">BRAND</h1>
+      </section>
+
+      <!-- highlighted auctions -->
+      <section class="mt-10 font-rasa">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xl font-semibold tracking-widest text-zinc-700">
+            HIGHLIGHTED AUCTIONS
+          </h2>
+        </div>
+        <div
+          class="mt-4 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+          id="highlightedGrid"
+        ></div>
+      </section>
+
+      <!-- gallery -->
+      <section class="mt-12 font-rasa">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xl font-semibold tracking-widest text-zinc-700">
+            GALLERY
+          </h2>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-zinc-500">SORT BY</span>
+          <select
+            id="sortSelect"
+            class="rounded-full bg-zinc-100 border border-zinc-200 px-3 py-2 text-sm"
+          >
+          <option value="endsSoon">Ending soon</option>
+          <option value="endsLate">Ending late</option>
+          <option value="newest">Newest</option>
+          <option value="oldest">Oldest</option>
+        </select>
+        </div>
+      </div>
+      
+
+      <div class="mt-4 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" id="galleryGrid"
+      >
+    </div>
+    </section>
+    </main>
+
     <script type="module" src="./script/pages/home.js"></script>
   </body>
 </html>
