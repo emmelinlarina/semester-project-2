@@ -23,50 +23,162 @@
   </head>
   <body class="bg-white text-zinc-900 font-radley">
     <header class="border-b border-zinc-200 bg-white">
-      <nav
-        class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4"
-      >
-        <div class="flex items-center gap-3">
-          <a
-            href="./index.html"
-            class="rounded-full bg-zinc-200 px-5 py-1 text-xl tracking-wide"
+      <nav class="mx-auto max-w-6xl px-4 py-4">
+        <!-- TOP ROW -->
+        <div class="flex items-center justify-between">
+          <!-- LEFT -->
+          <div class="flex items-center gap-3">
+            <a
+              href="./index.html"
+              class="rounded-full bg-zinc-200 px-5 py-1 text-xl tracking-wide"
+            >
+              AUCTION HOUSE
+            </a>
+
+            <button
+              type="button"
+              class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-zinc-200 hover:bg-zinc-300 transition"
+              aria-label="Search"
+            >
+              <i class="fas fa-search"></i>
+            </button>
+
+            <!-- Create (logged in only) -->
+            <a
+              id="navCreate"
+              href="./create-listing.html"
+              class="hidden h-10 w-10 items-center justify-center rounded-full bg-zinc-200 hover:bg-zinc-300 transition"
+              aria-label="Create listing"
+            >
+              <i class="fas fa-plus"></i>
+            </a>
+          </div>
+
+          <!-- DESKTOP: Logged OUT -->
+          <div id="navLoggedOut" class="hidden items-center">
+            <div
+              class="flex items-center gap-2 h-10 justify-center rounded-full bg-zinc-200 px-5 text-sm hover:bg-zinc-300 transition"
+            >
+              <a
+                href="./login.html"
+                class="inline-flex h-10 items-center justify-center rounded-full px-5 text-sm hover:font-extrabold"
+                aria-label="Log in"
+              >
+                LOG IN
+              </a>
+              <span class="text-zinc-500">|</span>
+              <a
+                href="./register.html"
+                class="inline-flex h-10 items-center justify-center rounded-full px-5 text-sm hover:font-extrabold"
+                aria-label="Sign up"
+              >
+                SIGN UP
+              </a>
+            </div>
+          </div>
+
+          <!-- DESKTOP: Logged IN -->
+          <div id="navLoggedIn" class="hidden items-center gap-2">
+            <span
+              id="navCredits"
+              class="inline-flex h-10 items-center justify-center rounded-full bg-zinc-200 px-5 text-sm font-semibold"
+            >
+              0 $
+            </span>
+
+            <a
+              href="./user-profile.html"
+              class="inline-flex h-10 items-center justify-center rounded-full bg-zinc-200 px-5 text-sm hover:bg-zinc-300 transition"
+            >
+              PROFILE
+            </a>
+
+            <button
+              id="logoutBtn"
+              type="button"
+              class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-zinc-200 hover:bg-zinc-300 transition"
+              aria-label="Log out"
+            >
+              <i class="fas fa-right-from-bracket"></i>
+            </button>
+          </div>
+
+          <!-- MOBILE ICON: Profile (only logged in) -->
+          <span
+            id="mobileCreditsTop"
+            class="hidden h-10 items-center justify-center rounded-full bg-zinc-200 px-5 text-sm font-semibold"
           >
-            AUCTION HOUSE
-          </a>
-          <button
-            type="button"
-            class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-zinc-200 hover:bg-zinc-300 transition"
-            aria-label="Search"
-          >
-            <i class="fas fa-search"></i>
-          </button>
+            0 $
+          </span>
           <a
-            id="navCreate"
-            href="./create-listing.html"
+            id="mobileProfileIcon"
+            href="./user-profile.html"
             class="hidden h-10 w-10 items-center justify-center rounded-full bg-zinc-200 hover:bg-zinc-300 transition"
-            aria-label="Create listing"
+            aria-label="Profile"
           >
-            <i class="fas fa-plus"></i>
+            <i class="fas fa-user"></i>
           </a>
+
+          <!-- MOBILE: Hamburger -->
+          <button
+            id="navMenu"
+            type="button"
+            class="inline-flex md:hidden h-10 w-10 items-center justify-center rounded-full bg-zinc-200 hover:bg-zinc-300 transition"
+            aria-label="Open menu"
+            aria-controls="mobileMenu"
+            aria-expanded="false"
+          >
+            <i class="fas fa-bars"></i>
+          </button>
         </div>
+
+        <!-- MOBILE MENU PANEL (UNDER ROW) -->
         <div
-          class="flex items-center gap-2 h-10 justify-center rounded-full bg-zinc-200 px-5 text-sm hover:bg-zinc-300 transition"
+          id="mobileMenu"
+          class="hidden mt-3 rounded-xl border border-zinc-200 bg-white p-3"
         >
-          <a
-            href="./login.html"
-            class="inline-flex h-10 items-center justify-center rounded-full px-5 text-sm hover:font-extrabold"
-            aria-label="Log in"
-            >LOG IN
-          </a>
-          |
-          <a
-            href="./register.html"
-            class="inline-flex h-10 items-center justify-center rounded-full px-5 text-sm hover:font-extrabold"
-            aria-label="Sign up"
-            >SIGN UP
-          </a>
+          <!-- Logged OUT -->
+          <div id="mobileLoggedOut">
+            <a
+              href="./login.html"
+              class="block rounded-lg px-4 py-3 text-sm font-semibold hover:bg-zinc-100"
+              >LOG IN</a
+            >
+            <a
+              href="./register.html"
+              class="mt-1 block rounded-lg px-4 py-3 text-sm font-semibold hover:bg-zinc-100"
+              >SIGN UP</a
+            >
+          </div>
+
+          <!-- Logged IN -->
+          <div id="mobileLoggedIn" class="hidden">
+            <div class="mb-1 rounded-lg bg-zinc-50 px-4 py-3 text-sm">
+              Credits: <span id="mobileCredits" class="font-semibold">0</span> $
+            </div>
+
+            <a
+              href="./user-profile.html"
+              class="block rounded-lg px-4 py-3 text-sm font-semibold hover:bg-zinc-100"
+              >PROFILE</a
+            >
+            <a
+              href="./create-listing.html"
+              class="mt-1 block rounded-lg px-4 py-3 text-sm font-semibold hover:bg-zinc-100"
+              >CREATE LISTING</a
+            >
+            <button
+              id="mobileLogoutBtn"
+              type="button"
+              class="mt-1 w-full rounded-lg px-4 py-3 text-left text-sm font-semibold hover:bg-zinc-100"
+            >
+              LOG OUT
+            </button>
+          </div>
         </div>
       </nav>
     </header>
+
+    <script type="module" src="./script/pages/home.js"></script>
   </body>
 </html>
