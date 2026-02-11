@@ -2,9 +2,9 @@ import { getApiKey } from "../utils/storage.js";
 import { apiFetch } from "./api-fetch.js";
 
 export async function getListings({
-  limit = 100,
+  limit = 12,
   page = 1,
-  sort = "created",
+  sort = "endsAt",
   sortOrder = "asc",
   active = true,
 } = {}) {
@@ -19,11 +19,9 @@ export async function getListings({
     _seller: "true",
   });
 
-  if (active) params.set("active", "true");
+  if (active) params.set("_active", "true");
 
-  const endpoint = `auction/listings?${params.toString()}`;
-
-  return apiFetch(endpoint, {
-    headers: { "X-API-Key": apiKey } ? { "X-API-Key": apiKey } : {},
+  return apiFetch(`auction/listings?${params.toString()}`, {
+    headers: apiKey ? { "X-Noroff-API-Key": apiKey } : {},
   });
 }

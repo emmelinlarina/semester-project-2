@@ -25,6 +25,12 @@ const hightlightedGrid = document.getElementById("highlightedGrid");
 const galleryGrid = document.getElementById("galleryGrid");
 const sortSelect = document.getElementById("sortSelect");
 
+const prevBtn = document.getElementById("prevBtn");
+const nextBtn = document.getElementById("nextBtn");
+const pageNumber = document.getElementById("pageNumber");
+
+const LIMIT = 12;
+
 // Hamburger toggle
 menuBtn?.addEventListener("click", () => {
   const isOpen = !mobileMenu.classList.contains("hidden");
@@ -137,20 +143,10 @@ function renderGrid(el, items) {
   el.innerHTML = items.map(cardTemplate).join("");
 }
 
-function sortListings(listings, sortBy) {
-  const sorted = [...listings];
-
-  switch (sortBy) {
-    case "endsLate":
-      return sorted.sort((a, b) => new Date(b.endsAt) - new Date(a.endsAt));
-    case "endsSoon":
-      return sorted.sort((a, b) => new Date(a.endsAt) - new Date(b.endsAt));
-    case "newest":
-      return sorted.sort((a, b) => new Date(b.created) - new Date(a.created));
-    case "oldest":
-      return sorted.sort((a, b) => new Date(a.created) - new Date(b.created));
-  }
-}
+// sorting
+let currentPage = 1;
+let currentSort = "endsAt";
+let currentOrder = "asc";
 
 function pickHighlighted(items) {
   return [...items]
@@ -158,28 +154,118 @@ function pickHighlighted(items) {
     .slice(0, 3);
 }
 
-async function initFeed() {
+let highlightedListings = [];
+let highlightedLoaded = false;
+
+async function loadHighlighted() {
+  if (highlightedLoaded) return;
+
+  await ensureAPIKey();
+
+  const res = await getListings({
+    limit: 6,
+    page: 1,
+    sort: "endsAt",
+    sortOrder: "asc",
+    active: true,
+  });
+
+  const items = res?.data ?? [];
+
+  highlightedListings = [...items]
+    .sort((a, b) => getHighestBid(b) - getHighestBid(a))
+    .slice(0, 3);
+
+  renderGrid(highlightedGrid, highlightedListings);
+  highlightedLoaded = true;
+}
+
+async function loadListings() {
   try {
+    if (galleryGrid)
+      galleryGrid.innerHTML = `<p class="text-sm text-zinc-600">Loading...</p>`;
+
     await ensureAPIKey();
 
-    const res = await getListings({ limit: 100, active: true });
+    const res = await getListings({
+      limit: LIMIT,
+      page: currentPage,
+      sort: currentSort,
+      sortOrder: currentOrder,
+      active: true,
+    });
+
     listings = res?.data ?? [];
 
-    renderGrid(hightlightedGrid, pickHighlighted(listings));
-    renderGrid(
-      galleryGrid,
-      sortListings(listings, sortSelect?.value || "endsSoon"),
-    );
+    if (!listings.length) {
+      if (highlightedGrid) highlightedGrid.innerHTML = "";
+      if (galleryGrid)
+        galleryGrid.innerHTML = `<p class="text-sm text-zinc-600">No listings found.</p>`;
+      updatePagerUI();
+      return;
+    }
+
+    renderGrid(galleryGrid, listings);
+
+    updatePagerUI();
   } catch (err) {
     console.error("Error loading listings:", err);
-    if (galleryGrid) galleryGrid.innerHTML = "<p>Error loading listings.</p>";
+    if (galleryGrid)
+      galleryGrid.innerHTML = `<p class="text-sm text-red-600">Error loading listings.</p>`;
   }
 }
 
-sortSelect?.addEventListener("change", () => {
-  renderGrid(galleryGrid, sortListings(listings, sortSelect.value));
+sortSelect?.addEventListener("change", async () => {
+  const value = sortSelect.value;
+
+  if (value === "endsSoon") {
+    currentSort = "endsAt";
+    currentOrder = "asc";
+  }
+
+  if (value === "endsLate") {
+    currentSort = "endsAt";
+    currentOrder = "desc";
+  }
+
+  if (value === "newest") {
+    currentSort = "created";
+    currentOrder = "desc";
+  }
+
+  if (value === "oldest") {
+    currentSort = "created";
+    currentOrder = "asc";
+  }
+
+  currentPage = 1;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  await loadListings();
 });
 
-initFeed();
+function updatePagerUI() {
+  if (pageNumber) pageNumber.textContent = String(currentPage);
+
+  if (prevBtn) prevBtn.disabled = currentPage === 1;
+
+  const noMorePages = listings.length < LIMIT;
+  if (nextBtn) nextBtn.disabled = noMorePages;
+}
+
+prevBtn?.addEventListener("click", async () => {
+  if (currentPage > 1) {
+    currentPage--;
+    await loadListings();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+});
+
+nextBtn?.addEventListener("click", async () => {
+  currentPage++;
+  await loadListings();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
 
 updateNav();
+loadHighlighted();
+loadListings();
