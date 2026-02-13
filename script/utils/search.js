@@ -1,34 +1,31 @@
 const searchToggle = document.getElementById("searchToggle");
+const searchOverlay = document.getElementById("searchOverlay");
 const searchInput = document.getElementById("searchInput");
 const searchForm = document.getElementById("searchForm");
 
 //toggle search
 export function initSearch(onSearch) {
   function open() {
-    searchForm.classList.remove("hidden");
-    searchInput.setAttribute("aria-expanded", "true");
+    searchOverlay.classList.remove("hidden");
+    document.body.classList.add("overflow-hidden");
     searchInput.focus();
   }
 
   function close() {
-    searchForm.classList.add("hidden");
-    searchToggle.setAttribute("aria-expanded", "false");
+    searchOverlay.classList.add("hidden");
+    document.body.classList.remove("overflow-hidden");
+    searchInput.value = "";
   }
 
-  searchToggle?.addEventListener("click", () => {
-    const isHidden = searchForm.classList.contains("hidden");
-    if (isHidden) open();
-    else close();
-  });
-
-  searchClose?.addEventListener("click", close);
+  searchToggle?.addEventListener("click", open);
 
   // submit search
   searchForm?.addEventListener("submit", (e) => {
     e.preventDefault();
-    const query = searchInput.value.trim();
+    const query = (searchInput.value || "").trim();
     onSearch(query);
     close();
+    searchInput.value = "";
   });
 
   // ESC
@@ -37,11 +34,8 @@ export function initSearch(onSearch) {
   });
 
   document.addEventListener("click", (e) => {
-    if (!searchForm.contains(e.target) && e.target !== searchToggle) {
-      const target = e.target;
-      const clickedInside =
-        searchForm.contains(target) || searchToggle.contains(target);
-      if (!clickedInside) close();
+    if (e.target === searchOverlay) {
+      close();
     }
   });
 }

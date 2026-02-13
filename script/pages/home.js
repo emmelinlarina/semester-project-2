@@ -26,6 +26,9 @@ const highlightedGrid = document.getElementById("highlightedGrid");
 const galleryGrid = document.getElementById("galleryGrid");
 const sortSelect = document.getElementById("sortSelect");
 
+// search
+const searchStatus = document.getElementById("searchStatus");
+
 const prevBtn = document.getElementById("prevBtn");
 const nextBtn = document.getElementById("nextBtn");
 const pageNumber = document.getElementById("pageNumber");
@@ -95,6 +98,7 @@ mobileLogoutBtn?.addEventListener("click", doLogout);
 // feed
 let listings = [];
 let query = "";
+let isSearching = false;
 
 function getHighestBid(listing) {
   const bids = listing.bids ?? [];
@@ -190,25 +194,40 @@ async function loadListings() {
     await ensureAPIKey();
 
     const res = await getListings({
-      limit: LIMIT,
-      page: currentPage,
+      limit: query ? 100 : LIMIT,
+      page: query ? 1 : currentPage,
       sort: currentSort,
       sortOrder: currentOrder,
       active: true,
-      q: query,
     });
 
     listings = res?.data ?? [];
 
-    if (!listings.length) {
-      if (highlightedGrid) highlightedGrid.innerHTML = "";
+    let displayItems = listings;
+
+    if (query) {
+      const q = query.toLowerCase();
+      displayItems = listings.filter((item) => {
+        const title = item.title?.toLowerCase() ?? "";
+        const description = item.description?.toLowerCase() ?? "";
+        return title.includes(q) || description.includes(q);
+      });
+    }
+
+    if (!displayItems.length) {
       if (galleryGrid)
         galleryGrid.innerHTML = `<p class="text-sm text-zinc-600">No listings found.</p>`;
-      updatePagerUI();
+      updatePagerUI(0);
       return;
     }
 
-    renderGrid(galleryGrid, listings);
+    if (searchStatus) {
+      searchStatus.textContent = query
+        ? `Search results for "${query}"`
+        : "Showing all listings";
+    }
+
+    renderGrid(galleryGrid, displayItems);
 
     updatePagerUI();
   } catch (err) {
@@ -246,12 +265,18 @@ sortSelect?.addEventListener("change", async () => {
   await loadListings();
 });
 
-function updatePagerUI() {
+function updatePagerUI(count = listings.length) {
   if (pageNumber) pageNumber.textContent = String(currentPage);
+
+  if (query) {
+    if (prevBtn) prevBtn.disabled = true;
+    if (nextBtn) nextBtn.disabled = true;
+    return;
+  }
 
   if (prevBtn) prevBtn.disabled = currentPage === 1;
 
-  const noMorePages = listings.length < LIMIT;
+  const noMorePages = count < LIMIT;
   if (nextBtn) nextBtn.disabled = noMorePages;
 }
 
@@ -271,6 +296,7 @@ nextBtn?.addEventListener("click", async () => {
 
 initSearch(async (q) => {
   query = q;
+  isSearching = Boolean(q);
   currentPage = 1;
   await loadListings();
 });
