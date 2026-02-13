@@ -216,21 +216,34 @@
             id="sortSelect"
             class="rounded-full bg-zinc-100 border border-zinc-200 px-3 py-2 text-sm"
           >
-          <option value="endsSoon">Ending soon</option>
-          <option value="endsLate">Ending late</option>
-          <option value="newest">Newest</option>
-          <option value="oldest">Oldest</option>
-        </select>
+            <option value="endsSoon">Ending soon</option>
+            <option value="endsLate">Ending late</option>
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
+          </select>
         </div>
-      </div>
-      
 
-      <div class="mt-4 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" id="galleryGrid"
-      ><button id="prevBtn">Previous</button>
-      <button id="nextBtn">Next</button>
-      <span id="pageNumber">1</span>
-    </div>
-    </section>
+        <div
+          class="mt-4 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+          id="galleryGrid"
+        ></div>
+        <!-- Pagination -->
+        <div class="mt-6 flex items-center justify-center gap-4">
+          <button
+            id="prevBtn"
+            class="rounded-full bg-zinc-200 px-6 py-2 text-sm font-semibold hover:bg-zinc-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Previous
+          </button>
+          <span id="pageNumber" class="text-sm font-semibold">1</span>
+          <button
+            id="nextBtn"
+            class="rounded-full bg-zinc-200 px-6 py-2 text-sm font-semibold hover:bg-zinc-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Next
+          </button>
+        </div>
+      </section>
     </main>
 
     <script type="module" src="./script/pages/home.js"></script>
