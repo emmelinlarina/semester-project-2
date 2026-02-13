@@ -9,7 +9,7 @@ export function initSearch({ onInput, onSubmit }) {
     searchOverlay?.classList.remove("hidden");
     document.body.classList.add("overflow-hidden");
     searchInput?.focus();
-    onInput?.(searchInput?.value ?? ""); // show suggestions instantly
+    onInput?.(searchInput?.value ?? "");
   }
 
   function close() {

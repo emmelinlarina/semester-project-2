@@ -138,7 +138,7 @@ function cardTemplate(listing) {
 
   return ` 
     <a href="./listing.html?id=${listing.id}" class="block rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
-      <img src="${image}" alt="${title}" class="w-full h-48 object-cover">
+      <img src="${image}" alt="${title}" class="w-full h-48 object-cover bg-zinc-200" loading="lazy" onerror="this.src='https://via.placeholder.com/400x300?text=No+Image'"/>
       <div class="p-4">
         <h3 class="text-lg font-semibold mb-2">${title}</h3>
         <p class="text-sm text-gray-600 mb-4">${description}</p>
@@ -156,7 +156,39 @@ function renderGrid(el, items) {
   el.innerHTML = items.map(cardTemplate).join("");
 }
 
-// sorting
+function spinnerMarkup(label = "Loading...") {
+  return `
+    <div class="flex items-center justify-center gap-3 py-10 text-zinc-600">
+      <div class="h-5 w-5 rounded-full border-2 border-t-2 border-zinc-400 border-t-zinc-600 animate-spin"></div>
+      <p class="text-sm">${label}</p>
+    </div>
+  `;
+}
+
+function skeletonCard(count = 12) {
+  return Array.from({ length: count })
+    .map(
+      () => `
+      <div class="block rounded-lg overflow-hidden shadow-md animate-pulse">
+        <div class="w-full h-48 bg-zinc-300"></div>
+
+        <div class="p-4">
+
+          <div class="h-5 w-2/3 bg-zinc-100 rounded mb-2"></div>
+          <div class="h-4 w-full bg-zinc-100 rounded mb-1"></div>
+          <div class="h-4 w-5/6 bg-zinc-100 rounded mb-4"></div>
+
+          <div class="flex items-center justify-between">
+            <div class="h-4 w-16 bg-zinc-100 rounded"></div>
+            <div class="h-3 w-20 bg-zinc-100 rounded"></div>
+          </div>
+        </div>
+      </div>
+    `,
+    )
+    .join("");
+}
+
 let currentPage = 1;
 let currentSort = "endsAt";
 let currentOrder = "asc";
@@ -171,7 +203,9 @@ let highlightedListings = [];
 let highlightedLoaded = false;
 
 async function loadHighlighted() {
-  if (highlightedLoaded) return;
+  if (!highlightedLoaded && highlightedGrid) {
+    highlightedGrid.innerHTML = skeletonCard(3);
+  }
 
   await ensureAPIKey();
 
@@ -184,7 +218,6 @@ async function loadHighlighted() {
   });
 
   const items = res?.data ?? [];
-
   highlightedListings = [...items]
     .sort((a, b) => getHighestBid(b) - getHighestBid(a))
     .slice(0, 3);
@@ -195,8 +228,7 @@ async function loadHighlighted() {
 
 async function loadListings() {
   try {
-    if (galleryGrid)
-      galleryGrid.innerHTML = `<p class="text-sm text-zinc-600">Loading...</p>`;
+    if (galleryGrid) galleryGrid.innerHTML = skeletonCard(LIMIT);
 
     await ensureAPIKey();
 
@@ -262,7 +294,6 @@ sortSelect?.addEventListener("change", async () => {
   }
 
   currentPage = 1;
-  window.scrollTo({ top: 0, behavior: "smooth" });
   await loadListings();
 });
 
@@ -285,14 +316,12 @@ prevBtn?.addEventListener("click", async () => {
   if (currentPage > 1) {
     currentPage--;
     await loadListings();
-    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 });
 
 nextBtn?.addEventListener("click", async () => {
   currentPage++;
   await loadListings();
-  window.scrollTo({ top: 0, behavior: "smooth" });
 });
 
 async function loadSearchPool() {
