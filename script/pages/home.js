@@ -1,6 +1,7 @@
 import { getToken, getProfile, logout } from "../utils/storage.js";
 import { getListings } from "../api/listings.js";
 import { ensureAPIKey } from "../api/auth.js";
+import { initSearch } from "../utils/search.js";
 
 const menuBtn = document.getElementById("navMenu");
 const mobileMenu = document.getElementById("mobileMenu");
@@ -21,7 +22,7 @@ const mobileLogoutBtn = document.getElementById("mobileLogoutBtn");
 const mobileProfileIcon = document.getElementById("mobileProfileIcon");
 
 // feed
-const hightlightedGrid = document.getElementById("highlightedGrid");
+const highlightedGrid = document.getElementById("highlightedGrid");
 const galleryGrid = document.getElementById("galleryGrid");
 const sortSelect = document.getElementById("sortSelect");
 
@@ -93,6 +94,7 @@ mobileLogoutBtn?.addEventListener("click", doLogout);
 
 // feed
 let listings = [];
+let query = "";
 
 function getHighestBid(listing) {
   const bids = listing.bids ?? [];
@@ -193,6 +195,7 @@ async function loadListings() {
       sort: currentSort,
       sortOrder: currentOrder,
       active: true,
+      q: query,
     });
 
     listings = res?.data ?? [];
@@ -264,6 +267,12 @@ nextBtn?.addEventListener("click", async () => {
   currentPage++;
   await loadListings();
   window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
+initSearch(async (q) => {
+  query = q;
+  currentPage = 1;
+  await loadListings();
 });
 
 updateNav();

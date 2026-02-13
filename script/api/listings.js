@@ -7,6 +7,7 @@ export async function getListings({
   sort = "endsAt",
   sortOrder = "asc",
   active = true,
+  q = "",
 } = {}) {
   const apiKey = getApiKey();
 
@@ -20,6 +21,7 @@ export async function getListings({
   });
 
   if (active) params.set("_active", "true");
+  if (q) params.set("q", q);
 
   return apiFetch(`auction/listings?${params.toString()}`, {
     headers: apiKey ? { "X-Noroff-API-Key": apiKey } : {},
