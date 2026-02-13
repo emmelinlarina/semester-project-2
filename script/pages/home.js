@@ -28,6 +28,11 @@ const sortSelect = document.getElementById("sortSelect");
 
 // search
 const searchStatus = document.getElementById("searchStatus");
+const searchResults = document.getElementById("searchResults");
+
+const gallerySearchForm = document.getElementById("gallerySearchForm");
+const gallerySearchInput = document.getElementById("gallerySearchInput");
+const galleryClearBtn = document.getElementById("galleryClearBtn");
 
 const prevBtn = document.getElementById("prevBtn");
 const nextBtn = document.getElementById("nextBtn");
@@ -97,8 +102,10 @@ mobileLogoutBtn?.addEventListener("click", doLogout);
 
 // feed
 let listings = [];
-let query = "";
-let isSearching = false;
+let searchPool = [];
+let galleryQuery = "";
+let isGallerySearching = false;
+let navQuery = "";
 
 function getHighestBid(listing) {
   const bids = listing.bids ?? [];
@@ -194,8 +201,8 @@ async function loadListings() {
     await ensureAPIKey();
 
     const res = await getListings({
-      limit: query ? 100 : LIMIT,
-      page: query ? 1 : currentPage,
+      limit: galleryQuery ? 100 : LIMIT,
+      page: galleryQuery ? 1 : currentPage,
       sort: currentSort,
       sortOrder: currentOrder,
       active: true,
@@ -204,14 +211,8 @@ async function loadListings() {
     listings = res?.data ?? [];
 
     let displayItems = listings;
-
-    if (query) {
-      const q = query.toLowerCase();
-      displayItems = listings.filter((item) => {
-        const title = item.title?.toLowerCase() ?? "";
-        const description = item.description?.toLowerCase() ?? "";
-        return title.includes(q) || description.includes(q);
-      });
+    if (isGallerySearching) {
+      displayItems = filterLocalListings(galleryQuery);
     }
 
     if (!displayItems.length) {
@@ -222,8 +223,8 @@ async function loadListings() {
     }
 
     if (searchStatus) {
-      searchStatus.textContent = query
-        ? `Search results for "${query}"`
+      searchStatus.textContent = galleryQuery
+        ? `Search results for "${galleryQuery}"`
         : "Showing all listings";
     }
 
@@ -268,7 +269,7 @@ sortSelect?.addEventListener("change", async () => {
 function updatePagerUI(count = listings.length) {
   if (pageNumber) pageNumber.textContent = String(currentPage);
 
-  if (query) {
+  if (galleryQuery) {
     if (prevBtn) prevBtn.disabled = true;
     if (nextBtn) nextBtn.disabled = true;
     return;
@@ -294,13 +295,94 @@ nextBtn?.addEventListener("click", async () => {
   window.scrollTo({ top: 0, behavior: "smooth" });
 });
 
-initSearch(async (q) => {
-  query = q;
-  isSearching = Boolean(q);
+async function loadSearchPool() {
+  try {
+    await ensureAPIKey();
+
+    const res = await getListings({
+      limit: 100,
+      page: 1,
+      sort: "endsAt",
+      sortOrder: "asc",
+      active: true,
+    });
+
+    searchPool = res?.data ?? [];
+  } catch (err) {
+    console.error("Error loading search pool:", err);
+    searchPool = [];
+  }
+}
+
+function renderSearchResults(items) {
+  if (!searchResults) return;
+
+  if (!items.length) {
+    searchResults.innerHTML = `<p class="text-sm text-zinc-600">No results found.</p>`;
+    return;
+  }
+
+  searchResults.innerHTML = items.slice(0, 10).map(cardTemplate).join("");
+}
+
+function filterLocalListings(q) {
+  const queryLower = (q || "").toLowerCase();
+  if (!queryLower) return [];
+
+  return listings.filter((item) => {
+    const title = item.title?.toLowerCase() ?? "";
+    const description = item.description?.toLowerCase() ?? "";
+    return title.includes(queryLower) || description.includes(queryLower);
+  });
+}
+
+function setGallerySearch(newQuery) {
+  galleryQuery = (newQuery || "").trim();
+  isGallerySearching = Boolean(galleryQuery);
+  currentPage = 1;
+  loadListings();
+}
+
+function filterPool(q) {
+  const queryLower = (q || "").toLowerCase();
+  if (!queryLower) return [];
+  return searchPool.filter((item) => {
+    const title = item.title?.toLowerCase() ?? "";
+    const description = item.description?.toLowerCase() ?? "";
+    return title.includes(queryLower) || description.includes(queryLower);
+  });
+}
+
+gallerySearchForm?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  galleryQuery = gallerySearchInput.value.trim();
+  isGallerySearching = Boolean(galleryQuery);
   currentPage = 1;
   await loadListings();
 });
 
+galleryClearBtn?.addEventListener("click", async () => {
+  gallerySearchInput.value = "";
+  galleryQuery = "";
+  isGallerySearching = false;
+  currentPage = 1;
+  await loadListings();
+});
+
+initSearch({
+  onInput: (q) => {
+    navQuery = (q || "").trim();
+    const matches = filterPool(navQuery);
+    renderSearchResults(matches);
+  },
+  onSubmit: (q) => {
+    navQuery = (q || "").trim();
+    const matches = filterPool(navQuery);
+    renderSearchResults(matches);
+  },
+});
+
 updateNav();
+await loadSearchPool();
 loadHighlighted();
 loadListings();

@@ -7,6 +7,7 @@ export async function getListings({
   sort = "endsAt",
   sortOrder = "asc",
   active = true,
+  q: query,
 } = {}) {
   const apiKey = getApiKey();
 
@@ -20,6 +21,7 @@ export async function getListings({
   });
 
   if (active) params.set("_active", "true");
+  if (query) params.set("q", query);
   console.log("Listings url:", `auction/listings?${params.toString()}`);
 
   return apiFetch(`auction/listings?${params.toString()}`, {
