@@ -28,3 +28,13 @@ export async function getListings({
     headers: apiKey ? { "X-Noroff-API-Key": apiKey } : {},
   });
 }
+
+export async function getListingsById(id) {
+  if (!id) throw new Error("Listing ID is required");
+
+  const apiKey = getApiKey();
+
+  return apiFetch(`auction/listings/${id}?_bids=true&_seller=true`, {
+    headers: apiKey ? { "X-Noroff-API-Key": apiKey } : {},
+  });
+}

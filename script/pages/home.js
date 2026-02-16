@@ -1,32 +1,18 @@
-import { getToken, getProfile, logout } from "../utils/storage.js";
 import { getListings } from "../api/listings.js";
 import { ensureAPIKey } from "../api/auth.js";
 import { initSearch } from "../utils/search.js";
+import { initNav } from "../utils/nav.js";
+import {
+  getHighestBid,
+  renderGrid,
+  skeletonCard,
+  cardTemplate,
+} from "../render/listing-card.js";
 
-const menuBtn = document.getElementById("navMenu");
-const mobileMenu = document.getElementById("mobileMenu");
-
-//navbar elements
-const navCreate = document.getElementById("navCreate");
-const navLoggedOut = document.getElementById("navLoggedOut");
-const navLoggedIn = document.getElementById("navLoggedIn");
-const navCredits = document.getElementById("navCredits");
-
-const mobileLoggedOut = document.getElementById("mobileLoggedOut");
-const mobileLoggedIn = document.getElementById("mobileLoggedIn");
-const mobileCredits = document.getElementById("mobileCredits");
-const mobileCreditsTop = document.getElementById("mobileCreditsTop");
-
-const logoutBtn = document.getElementById("logoutBtn");
-const mobileLogoutBtn = document.getElementById("mobileLogoutBtn");
-const mobileProfileIcon = document.getElementById("mobileProfileIcon");
-
-// feed
 const highlightedGrid = document.getElementById("highlightedGrid");
 const galleryGrid = document.getElementById("galleryGrid");
 const sortSelect = document.getElementById("sortSelect");
 
-// search
 const searchStatus = document.getElementById("searchStatus");
 const searchResults = document.getElementById("searchResults");
 
@@ -38,67 +24,8 @@ const prevBtn = document.getElementById("prevBtn");
 const nextBtn = document.getElementById("nextBtn");
 const pageNumber = document.getElementById("pageNumber");
 
+//config
 const LIMIT = 12;
-
-// Hamburger toggle
-menuBtn?.addEventListener("click", () => {
-  const isOpen = !mobileMenu.classList.contains("hidden");
-  mobileMenu.classList.toggle("hidden");
-  menuBtn.setAttribute("aria-expanded", String(!isOpen));
-});
-
-//navbar icons
-function updateNav() {
-  const token = getToken();
-  const profile = getProfile();
-  const credits = profile?.credits ?? 0;
-
-  console.log("TOKEN:", token);
-
-  navLoggedOut?.classList.add("hidden");
-  navLoggedOut?.classList.remove("md:flex");
-
-  navLoggedIn?.classList.add("hidden");
-  navLoggedIn?.classList.remove("md:flex");
-
-  navCreate?.classList.add("hidden");
-
-  mobileLoggedOut?.classList.add("hidden");
-  mobileLoggedIn?.classList.add("hidden");
-
-  mobileProfileIcon?.classList.remove("hidden");
-  mobileProfileIcon?.classList.add("inline-flex", "md:hidden");
-
-  if (token) {
-    navLoggedIn?.classList.remove("hidden");
-    navLoggedIn?.classList.add("md:flex", "max-md:hidden");
-
-    navCreate?.classList.remove("hidden");
-    navCreate?.classList.add("md:inline-flex", "max-md:hidden");
-
-    mobileLoggedIn?.classList.remove("hidden");
-
-    mobileProfileIcon?.classList.remove("hidden");
-    mobileProfileIcon?.classList.add("inline-flex", "md:hidden");
-
-    if (navCredits) navCredits.textContent = `${credits} $`;
-    if (mobileCredits) mobileCredits.textContent = String(credits);
-    if (mobileCreditsTop) mobileCreditsTop.textContent = `${credits} $`;
-  } else {
-    navLoggedOut?.classList.remove("hidden");
-    navLoggedOut?.classList.add("md:flex", "max-md:hidden");
-
-    mobileLoggedOut?.classList.remove("hidden");
-  }
-}
-
-function doLogout() {
-  logout();
-  window.location.href = "./login.html";
-}
-
-logoutBtn?.addEventListener("click", doLogout);
-mobileLogoutBtn?.addEventListener("click", doLogout);
 
 // feed
 let listings = [];
@@ -107,91 +34,12 @@ let galleryQuery = "";
 let isGallerySearching = false;
 let navQuery = "";
 
-function getHighestBid(listing) {
-  const bids = listing.bids ?? [];
-  return bids.reduce((max, bid) => (bid.amount > max ? bid.amount : max), 0);
-}
-
-function timeLeft(endTime) {
-  const end = new Date(endTime);
-  const diff = end - Date.now();
-  if (diff <= 0) return "Ended";
-
-  const mins = Math.floor(diff / 60000);
-  const hours = Math.floor(diff / 3600000);
-  const days = Math.floor(hours / 24);
-
-  if (days > 0) return `${days}d ${hours % 24}h`;
-  if (hours > 0) return `${hours}h ${mins % 60}m`;
-  return `${mins}m`;
-}
-
-function cardTemplate(listing) {
-  const title = listing?.title ?? "Untitled";
-  const description = listing?.description ?? "";
-  const bid = getHighestBid(listing);
-  const time = timeLeft(listing?.endsAt);
-  const image =
-    listing?.media?.length > 0 && listing.media[0].url
-      ? listing.media[0].url
-      : "https://via.placeholder.com/400x300?text=No+Image";
-
-  return ` 
-    <a href="./listing.html?id=${listing.id}" class="block rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
-      <img src="${image}" alt="${title}" class="w-full h-48 object-cover bg-zinc-200" loading="lazy" onerror="this.src='https://via.placeholder.com/400x300?text=No+Image'"/>
-      <div class="p-4">
-        <h3 class="text-lg font-semibold mb-2">${title}</h3>
-        <p class="text-sm text-gray-600 mb-4">${description}</p>
-        <div class="flex items-center justify-between">
-          <span class="text-sm font-bold">${bid} $</span>
-          <span class="text-xs text-gray-500">${time}</span>
-        </div>
-      </div>
-    </a>
-  `;
-}
-
-function renderGrid(el, items) {
-  if (!el) return;
-  el.innerHTML = items.map(cardTemplate).join("");
-}
-
-function spinnerMarkup(label = "Loading...") {
-  return `
-    <div class="flex items-center justify-center gap-3 py-10 text-zinc-600">
-      <div class="h-5 w-5 rounded-full border-2 border-t-2 border-zinc-400 border-t-zinc-600 animate-spin"></div>
-      <p class="text-sm">${label}</p>
-    </div>
-  `;
-}
-
-function skeletonCard(count = 12) {
-  return Array.from({ length: count })
-    .map(
-      () => `
-      <div class="block rounded-lg overflow-hidden shadow-md animate-pulse">
-        <div class="w-full h-48 bg-zinc-300"></div>
-
-        <div class="p-4">
-
-          <div class="h-5 w-2/3 bg-zinc-100 rounded mb-2"></div>
-          <div class="h-4 w-full bg-zinc-100 rounded mb-1"></div>
-          <div class="h-4 w-5/6 bg-zinc-100 rounded mb-4"></div>
-
-          <div class="flex items-center justify-between">
-            <div class="h-4 w-16 bg-zinc-100 rounded"></div>
-            <div class="h-3 w-20 bg-zinc-100 rounded"></div>
-          </div>
-        </div>
-      </div>
-    `,
-    )
-    .join("");
-}
-
 let currentPage = 1;
 let currentSort = "endsAt";
 let currentOrder = "asc";
+
+let highlightedListings = [];
+let highlightedLoaded = false;
 
 function pickHighlighted(items) {
   return [...items]
@@ -199,8 +47,52 @@ function pickHighlighted(items) {
     .slice(0, 3);
 }
 
-let highlightedListings = [];
-let highlightedLoaded = false;
+function updatePagerUI(count = listings.length) {
+  if (pageNumber) pageNumber.textContent = String(currentPage);
+
+  if (galleryQuery) {
+    if (prevBtn) prevBtn.disabled = true;
+    if (nextBtn) nextBtn.disabled = true;
+    return;
+  }
+
+  if (prevBtn) prevBtn.disabled = currentPage === 1;
+
+  const noMorePages = count < LIMIT;
+  if (nextBtn) nextBtn.disabled = noMorePages;
+}
+
+function filterLocalListings(q) {
+  const queryLower = (q || "").toLowerCase();
+  if (!queryLower) return [];
+
+  return listings.filter((item) => {
+    const title = item.title?.toLowerCase() ?? "";
+    const description = item.description?.toLowerCase() ?? "";
+    return title.includes(queryLower) || description.includes(queryLower);
+  });
+}
+
+function filterPool(q) {
+  const queryLower = (q || "").toLowerCase();
+  if (!queryLower) return [];
+  return searchPool.filter((item) => {
+    const title = item.title?.toLowerCase() ?? "";
+    const description = item.description?.toLowerCase() ?? "";
+    return title.includes(queryLower) || description.includes(queryLower);
+  });
+}
+
+function renderSearchResults(items) {
+  if (!searchResults) return;
+
+  if (!items.length) {
+    searchResults.innerHTML = `<p class="text-sm text-zinc-600">No results found.</p>`;
+    return;
+  }
+
+  searchResults.innerHTML = items.slice(0, 10).map(cardTemplate).join("");
+}
 
 async function loadHighlighted() {
   if (!highlightedLoaded && highlightedGrid) {
@@ -270,6 +162,26 @@ async function loadListings() {
   }
 }
 
+async function loadSearchPool() {
+  try {
+    await ensureAPIKey();
+
+    const res = await getListings({
+      limit: 100,
+      page: 1,
+      sort: "endsAt",
+      sortOrder: "asc",
+      active: true,
+    });
+
+    searchPool = res?.data ?? [];
+  } catch (err) {
+    console.error("Error loading search pool:", err);
+    searchPool = [];
+  }
+}
+
+//events
 sortSelect?.addEventListener("change", async () => {
   const value = sortSelect.value;
 
@@ -297,21 +209,6 @@ sortSelect?.addEventListener("change", async () => {
   await loadListings();
 });
 
-function updatePagerUI(count = listings.length) {
-  if (pageNumber) pageNumber.textContent = String(currentPage);
-
-  if (galleryQuery) {
-    if (prevBtn) prevBtn.disabled = true;
-    if (nextBtn) nextBtn.disabled = true;
-    return;
-  }
-
-  if (prevBtn) prevBtn.disabled = currentPage === 1;
-
-  const noMorePages = count < LIMIT;
-  if (nextBtn) nextBtn.disabled = noMorePages;
-}
-
 prevBtn?.addEventListener("click", async () => {
   if (currentPage > 1) {
     currentPage--;
@@ -323,64 +220,6 @@ nextBtn?.addEventListener("click", async () => {
   currentPage++;
   await loadListings();
 });
-
-async function loadSearchPool() {
-  try {
-    await ensureAPIKey();
-
-    const res = await getListings({
-      limit: 100,
-      page: 1,
-      sort: "endsAt",
-      sortOrder: "asc",
-      active: true,
-    });
-
-    searchPool = res?.data ?? [];
-  } catch (err) {
-    console.error("Error loading search pool:", err);
-    searchPool = [];
-  }
-}
-
-function renderSearchResults(items) {
-  if (!searchResults) return;
-
-  if (!items.length) {
-    searchResults.innerHTML = `<p class="text-sm text-zinc-600">No results found.</p>`;
-    return;
-  }
-
-  searchResults.innerHTML = items.slice(0, 10).map(cardTemplate).join("");
-}
-
-function filterLocalListings(q) {
-  const queryLower = (q || "").toLowerCase();
-  if (!queryLower) return [];
-
-  return listings.filter((item) => {
-    const title = item.title?.toLowerCase() ?? "";
-    const description = item.description?.toLowerCase() ?? "";
-    return title.includes(queryLower) || description.includes(queryLower);
-  });
-}
-
-function setGallerySearch(newQuery) {
-  galleryQuery = (newQuery || "").trim();
-  isGallerySearching = Boolean(galleryQuery);
-  currentPage = 1;
-  loadListings();
-}
-
-function filterPool(q) {
-  const queryLower = (q || "").toLowerCase();
-  if (!queryLower) return [];
-  return searchPool.filter((item) => {
-    const title = item.title?.toLowerCase() ?? "";
-    const description = item.description?.toLowerCase() ?? "";
-    return title.includes(queryLower) || description.includes(queryLower);
-  });
-}
 
 gallerySearchForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -411,7 +250,7 @@ initSearch({
   },
 });
 
-updateNav();
+initNav();
 await loadSearchPool();
 loadHighlighted();
 loadListings();
