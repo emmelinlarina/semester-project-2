@@ -45,9 +45,9 @@ export function cardTemplate(
   `;
 }
 
-export function renderGrid(el, items) {
+export function renderGrid(el, items, templateFn = cardTemplate) {
   if (!el) return;
-  el.innerHTML = items.map(cardTemplate).join("");
+  el.innerHTML = items.map(templateFn).join("");
 }
 
 export function spinnerMarkup(label = "Loading...") {
