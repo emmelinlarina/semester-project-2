@@ -1,5 +1,6 @@
 import { login, ensureAPIKey } from "../api/auth.js";
 import { setToken, setProfile } from "../utils/storage.js";
+import { refreshProfile } from "../api/profiles.js";
 
 const form = document.querySelector("#loginForm");
 const box = document.querySelector("#loginMessage");
@@ -36,12 +37,15 @@ form.addEventListener("submit", async (e) => {
     btn.disabled = true;
 
     const response = await login(data);
-
     const user = response.data;
+
     setToken(user.accessToken);
     setProfile(user);
 
     await ensureAPIKey();
+
+    const fresh = await refreshProfile();
+    setProfile(fresh || user);
 
     redirecting = true;
     showSuccess("Login successful! Redirecting…");

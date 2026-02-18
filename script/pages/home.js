@@ -99,8 +99,6 @@ async function loadHighlighted() {
     highlightedGrid.innerHTML = skeletonCard(3);
   }
 
-  await ensureAPIKey();
-
   const res = await getListings({
     limit: 6,
     page: 1,
@@ -121,8 +119,6 @@ async function loadHighlighted() {
 async function loadListings() {
   try {
     if (galleryGrid) galleryGrid.innerHTML = skeletonCard(LIMIT);
-
-    await ensureAPIKey();
 
     const res = await getListings({
       limit: galleryQuery ? 100 : LIMIT,
@@ -164,8 +160,6 @@ async function loadListings() {
 
 async function loadSearchPool() {
   try {
-    await ensureAPIKey();
-
     const res = await getListings({
       limit: 100,
       page: 1,

@@ -15,12 +15,15 @@ export function login({ email, password }) {
   });
 }
 
-export async function ensureAPIKey() {
+export async function ensureAPIKey({ required = false } = {}) {
   const existing = getApiKey();
   if (existing) return existing;
 
   const token = getToken();
-  if (!token) throw new Error("Missing token. Please log in again.");
+  if (!token) {
+    if (required) throw new Error("Missing token, user must be logged in");
+    return null;
+  }
 
   const res = await apiFetch("auth/create-api-key", {
     method: "POST",

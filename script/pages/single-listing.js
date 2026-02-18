@@ -7,6 +7,7 @@ import {
   timeLeft,
   spinnerMarkup,
 } from "../render/listing-card.js";
+import { refreshProfile } from "../api/profiles.js";
 
 const listingRoot = document.getElementById("listingRoot");
 
@@ -153,6 +154,14 @@ function singleListingTemplate(listing) {
                       ${isEnded ? "Ended" : "Active"}
                   </span>
                 </div>
+
+                ${
+                  isEnded
+                    ? `<p class="text-xs text-red-600 mt-1">Auction Ended</p>`
+                    : isOwner
+                      ? `<p class="text-xs text-zinc-600 mt-1">You own this listing - bidding disabled. </p>`
+                      : ""
+                }
 
                 <p class="text-xs text-zinc-500 mt-1">
                     Minimum bid: <span class="font-semibold">${highestBid + 1} $</span>
@@ -312,6 +321,7 @@ function initBidSubmit(listingId, listing) {
   const token = getToken();
   const profile = getProfile();
   const sellerName = listing?.seller?.name ?? null;
+
   const isOwner = Boolean(
     profile?.name && sellerName && profile.name === sellerName,
   );
@@ -327,12 +337,32 @@ function initBidSubmit(listingId, listing) {
     msg.textContent = "";
     msg.className = "text-sm mt-3";
 
-    const amount = Number(input.value);
+    const raw = input.value.trim();
+
+    if (!raw) {
+      msg.textContent = "Please enter a bid amount.";
+      msg.classList.add("text-red-600");
+      return;
+    }
+
+    const amount = Number(raw);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      msg.textContent = "Please enter a valid bid amount.";
+      msg.classList.add("text-red-600");
+      return;
+    }
+
+    if (!Number.isInteger(amount)) {
+      msg.textContent = "Bid amount must be a whole number.";
+      msg.classList.add("text-red-600");
+      return;
+    }
+
     const highestBidNum = Number(getHighestBid(listing)) || 0;
     const minBid = highestBidNum + 1;
 
-    if (!Number.isFinite(amount) || amount < minBid) {
-      msg.textContent = `Bid must be at least ${minBid} $`;
+    if (amount < minBid) {
+      msg.textContent = `Bid must be at least ${minBid} $.`;
       msg.classList.add("text-red-600");
       return;
     }
@@ -345,6 +375,12 @@ function initBidSubmit(listingId, listing) {
 
       msg.textContent = "Bid placed successfully!";
       msg.classList.add("text-green-600");
+
+      await refreshProfile();
+      console.log("updated profile:", updated);
+      initNav();
+
+      input.value = "";
 
       const res = await getListingsById(listingId);
       const fresh = res?.data ?? res;
@@ -360,8 +396,42 @@ function initBidSubmit(listingId, listing) {
 
       initBidSubmit(listingId, fresh);
     } catch (error) {
-      msg.textContent = `Error placing bid: ${error.message}`;
+      const lower = String(error?.message || "").toLowerCase();
+
+      if (
+        lower.includes("credit") ||
+        lower.includes("credits") ||
+        lower.includes("insufficient")
+      ) {
+        msg.textContent = "Not enough credits to place this bid.";
+      } else if (lower.includes("ended") || lower.includes("expired")) {
+        msg.textContent = "Auction has already ended.";
+      } else {
+        msg.textContent = `Error placing bid: ${error?.message}`;
+      }
+
       msg.classList.add("text-red-600");
+
+      try {
+        const res = await getListingsById(listingId);
+        const fresh = res?.data ?? res;
+
+        if (fresh?.endsAt && new Date(fresh.endsAt) <= new Date()) {
+          listingRoot.innerHTML = singleListingTemplate(fresh);
+
+          const images = (fresh?.media ?? []).map((m) => m.url).filter(Boolean);
+          initGallery(
+            images.length
+              ? images
+              : ["https://via.placeholder.com/600x400?text=No+Image"],
+          );
+
+          initBidSubmit(listingId, fresh);
+          return;
+        }
+      } catch {
+        // ignore
+      }
       if (btn) btn.disabled = false;
     }
   });
@@ -401,7 +471,7 @@ async function loadSingleListing() {
 
     initBidSubmit(id, listing);
   } catch (error) {
-    listingRoot.innerHTML = `<p class="text-sm text-red-600">Error loading listing: ${error.message}</p>`;
+    listingRoot.innerHTML = `<p class="text-sm text-red-600">Error loading listing: ${error?.message}</p>`;
   }
 }
 
