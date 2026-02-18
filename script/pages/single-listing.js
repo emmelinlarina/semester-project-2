@@ -1,6 +1,6 @@
 import { ensureAPIKey } from "../api/auth.js";
-import { getToken } from "../utils/storage.js";
-import { getListingsById } from "../api/listings.js";
+import { getToken, getProfile } from "../utils/storage.js";
+import { getListingsById, placeBid } from "../api/listings.js";
 import { initNav } from "../utils/nav.js";
 import {
   getHighestBid,
@@ -17,8 +17,19 @@ function getIdFromURL() {
 function singleListingTemplate(listing) {
   const title = listing?.title ?? "Untitled Listing";
   const description = listing?.description ?? "No description provided.";
-  const bid = getHighestBid(listing);
 
+  const seller = listing?.seller?.name ?? "Unknown Seller";
+
+  const isEnded = listing?.endsAt
+    ? new Date(listing.endsAt) <= new Date()
+    : false;
+
+  const token = getToken();
+  const profile = getProfile();
+  const isOwner = Boolean(profile?.name && seller && profile.name === seller);
+  const bidDisabled = !token || isEnded || isOwner;
+
+  const bid = getHighestBid(listing);
   const time = timeLeft(listing?.endsAt);
 
   const media = listing?.media ?? [];
@@ -29,14 +40,10 @@ function singleListingTemplate(listing) {
   const endsAt = listing?.endsAt
     ? new Date(listing.endsAt).toLocaleString()
     : "N/A";
-  const seller = listing?.seller?.name ?? "Unknown Seller";
-  const isEnded = listing?.endsAt
-    ? new Date(listing.endsAt) <= new Date()
-    : false;
 
   const bids = Array.isArray(listing?.bids) ? listing.bids : [];
-  const token = getToken();
-  const highestBid = getHighestBid(listing);
+
+  const highestBid = Number(getHighestBid(listing)) || 0;
   return `
     
   <article class="mt-6 grid gap-6 lg:grid-cols-2">
@@ -158,15 +165,15 @@ function singleListingTemplate(listing) {
                     min="${highestBid + 1}"
                     step="1"
                     class="w-full rounded-lg border border-zinc-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-zinc-500"
-                    placeholder="${token ? "Enter your bid amount" : "Login to place a bid"}"
-                    ${!token || isEnded ? "disabled" : ""}
+                    placeholder="${!token ? "Login to place a bid" : isOwner ? "Owners can't bid on their own listing" : isEnded ? "Auction ended" : "Enter your bid amount"}"
+                    ${bidDisabled ? "disabled" : ""}
                     />
 
                     <button
                     id ="bidSubmit"
                     type="submit"
                     class="rounded-lg bg-zinc-800 text-white px-4 py-2 hover:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-500 disabled:bg-zinc-400 disabled:cursor-not-allowed"
-                    ${!token || isEnded ? "disabled" : ""}
+                    ${bidDisabled ? "disabled" : ""}
                     >
                     Place Bid
                     </button>
@@ -203,21 +210,23 @@ function renderBidHistory(bids = []) {
     return `<p class="text-sm text-gray-500">No bids placed yet.</p>`;
   }
 
-  const sorted = [...bids].sort(
-    (a, b) => new Date(b?.created) - new Date(a?.created),
-  );
+  const sorted = [...bids].sort((a, b) => {
+    const aT = new Date(a?.createdAt ?? a?.created ?? 0).getTime();
+    const bT = new Date(b?.createdAt ?? b?.created ?? 0).getTime();
+    return bT - aT;
+  });
 
   return sorted
     .map((b) => {
       const name = b?.bidder?.name ?? "Unknown Bidder";
       const amount = Number(b?.amount) || 0;
-      const time = formatWhen(b?.created);
+      const t = formatWhen(b?.createdAt ?? b?.created);
 
       return `
         <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-3 flex items-center justify-between gap-4">
           <div class="min-w-0">
             <p class="text-sm font-medium text-gray-900 truncate">${name}</p>
-            <p class="text-sm text-gray-500">${time}</p>
+            <p class="text-sm text-gray-500">${t}</p>
           </div>
           <p class="text-sm font-semibold text-gray-900">${amount} $</p>
         </div>
@@ -292,6 +301,72 @@ function initGallery(images) {
   render();
 }
 
+function initBidSubmit(listingId, listing) {
+  const form = document.getElementById("bidForm");
+  const input = document.getElementById("bidAmount");
+  const msg = document.getElementById("bidMsg");
+  const btn = document.getElementById("bidSubmit");
+
+  if (!form || !input || !msg) return;
+
+  const token = getToken();
+  const profile = getProfile();
+  const sellerName = listing?.seller?.name ?? null;
+  const isOwner = Boolean(
+    profile?.name && sellerName && profile.name === sellerName,
+  );
+  const isEnded = listing?.endsAt
+    ? new Date(listing.endsAt) <= new Date()
+    : false;
+
+  if (!token || isOwner || isEnded) return;
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    msg.textContent = "";
+    msg.className = "text-sm mt-3";
+
+    const amount = Number(input.value);
+    const highestBidNum = Number(getHighestBid(listing)) || 0;
+    const minBid = highestBidNum + 1;
+
+    if (!Number.isFinite(amount) || amount < minBid) {
+      msg.textContent = `Bid must be at least ${minBid} $`;
+      msg.classList.add("text-red-600");
+      return;
+    }
+
+    if (btn) btn.disabled = true;
+
+    try {
+      await ensureAPIKey();
+      await placeBid(listingId, amount);
+
+      msg.textContent = "Bid placed successfully!";
+      msg.classList.add("text-green-600");
+
+      const res = await getListingsById(listingId);
+      const fresh = res?.data ?? res;
+
+      listingRoot.innerHTML = singleListingTemplate(fresh);
+
+      const images = (fresh?.media ?? []).map((m) => m.url).filter(Boolean);
+      initGallery(
+        images.length
+          ? images
+          : ["https://via.placeholder.com/600x400?text=No+Image"],
+      );
+
+      initBidSubmit(listingId, fresh);
+    } catch (error) {
+      msg.textContent = `Error placing bid: ${error.message}`;
+      msg.classList.add("text-red-600");
+      if (btn) btn.disabled = false;
+    }
+  });
+}
+
 async function loadSingleListing() {
   const id = getIdFromURL();
 
@@ -323,6 +398,8 @@ async function loadSingleListing() {
         ? images
         : ["https://via.placeholder.com/600x400?text=No+Image"],
     );
+
+    initBidSubmit(id, listing);
   } catch (error) {
     listingRoot.innerHTML = `<p class="text-sm text-red-600">Error loading listing: ${error.message}</p>`;
   }

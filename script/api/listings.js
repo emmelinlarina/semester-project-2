@@ -1,4 +1,4 @@
-import { getApiKey } from "../utils/storage.js";
+import { getApiKey, getToken } from "../utils/storage.js";
 import { apiFetch } from "./api-fetch.js";
 
 export async function getListings({
@@ -36,5 +36,25 @@ export async function getListingsById(id) {
 
   return apiFetch(`auction/listings/${id}?_bids=true&_seller=true`, {
     headers: apiKey ? { "X-Noroff-API-Key": apiKey } : {},
+  });
+}
+
+export async function placeBid(listingId, amount) {
+  if (!listingId) throw new Error("Listing ID is required");
+  if (!Number.isFinite(amount))
+    throw new Error("Bid amount must be a valid number");
+
+  const token = getToken();
+  if (!token) throw new Error("User must be logged in to place a bid");
+
+  const apiKey = getApiKey();
+  return apiFetch(`auction/listings/${listingId}/bids`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(apiKey ? { "X-Noroff-API-Key": apiKey } : {}),
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ amount }),
   });
 }
