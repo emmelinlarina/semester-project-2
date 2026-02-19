@@ -376,7 +376,7 @@ function initBidSubmit(listingId, listing) {
       msg.textContent = "Bid placed successfully!";
       msg.classList.add("text-green-600");
 
-      await refreshProfile();
+      const updated = await refreshProfile();
       console.log("updated profile:", updated);
       initNav();
 
@@ -450,7 +450,6 @@ async function loadSingleListing() {
   listingRoot.innerHTML = spinnerMarkup("Loading listing...");
 
   try {
-    await ensureAPIKey();
     const res = await getListingsById(id);
     const listing = res?.data ?? res;
 
