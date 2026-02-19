@@ -13,9 +13,17 @@
     ></script>
 
     <link rel="stylesheet" href="css/styles.css" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Radley:ital@0;1&family=Rasa:ital,wght@0,300..700;1,300..700&display=swap"
+      rel="stylesheet"
+    />
   </head>
+
   <body>
-    <header class="border-b border-zinc-200 bg-white">
+    <header class="border-b border-zinc-200 bg-white font-rasa">
       <nav class="mx-auto max-w-6xl px-4 py-4">
         <!-- TOP ROW -->
         <div class="flex items-center justify-between">
@@ -206,15 +214,110 @@
         </div>
       </nav>
     </header>
-    <main>
-      <p class="mt-4 text-lg">
-        Credits: <span id="credits" class="font-bold">0</span> $
-      </p>
 
-      <button id="refreshCredits" class="mt-3 border p-2 rounded">
-        Refresh
-      </button>
-      <p id="creditsMsg" class="mt-2"></p>
+    <main class="mx-auto max-w-6xl px-4 py-8 font-rasa">
+      <section
+        class="rounded-3xl border border-zinc-200 bg-white overflow-hidden"
+      >
+        <div class="relative h-36 sm:h-44 bg-zinc-100">
+          <img
+            id="profileBanner"
+            class="absolute inset-0 h-full w-full object-cover"
+            alt="Profile banner"
+            loading="lazy"
+          />
+          <div class="absolute -bottom-10 left-6">
+            <div
+              class="h-24 w-24 rounded-full bg-white p-2 shadow-sm border border-zinc-200"
+            >
+              <img
+                id="profileAvatar"
+                class="h-full w-full rounded-full object-cover"
+                alt="Profile avatar"
+                loading="lazy"
+              />
+            </div>
+          </div>
+
+          <div class="absolute right-6 top-4">
+            <span
+              class="inline-flex items-center rounded-full bg-white/90 border border-zinc-200 px-4 py-2 text-sm font-semibold"
+            >
+              <span id="creditsValue">0</span> $
+            </span>
+          </div>
+        </div>
+
+        <div class="pt-14 pb-6 px-6">
+          <h1 id="profileTitle" class="text-xl sm:text-2xl font-semibold">
+            User
+          </h1>
+          <p
+            id="profileBio"
+            class="mt-2 text-sm text-zinc-600 whitespace-pre-wrap"
+          >
+            No bio yet.
+          </p>
+
+          <div class="mt-4 flex flex-wrap items-center gap-2">
+            <button
+              id="refreshCredits"
+              class="border p-2 rounded-full bg-zinc-200 hover:bg-zinc-300 transition text-sm font-semibold"
+            >
+              Refresh
+            </button>
+            <p id="creditsMsg" class="text-sm"></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="mt-8 grid gap-6 lg:grid-cols-[220px_1fr]">
+        <aside class="rounded-3xl border border-zinc-200 bg-white p-4 h-fit">
+          <p class="text-xs font-semibold tracking-widest text-zinc-500">
+            Dashboard
+          </p>
+
+          <div class="mt-3 grid gap-2">
+            <button
+              data-tab="listings"
+              class="tabBtn w-full text-left rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-semibold hover:bg-zinc-100"
+              type="button"
+            >
+              My Listings
+            </button>
+
+            <button
+              data-tab="bids"
+              class="tabBtn w-full text-left rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-semibold hover:bg-zinc-100"
+              type="button"
+            >
+              My Bids
+            </button>
+          </div>
+        </aside>
+
+        <div class="min-h-60">
+          <div id="tabListings" class="tabPanel">
+            <h2 class="text-lg font-semibold">My Listings</h2>
+            <p class="mt-1 text-sm text-zinc-500">Listings you created</p>
+
+            <div
+              id="myListingsGrid"
+              class="mt-4 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+            ></div>
+
+            <div
+              id="tabBids"
+              class="tabPanel hidden">
+            <h2 class="text-lg font-semibold">My Bids</h2>
+            <p class="mt-1 text-sm text-zinc-500">Bids you placed</p>
+            <div
+              id="myBidsGrid"
+              class="mt-4 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+            ></div>
+            </div>
+        </div>
+      </section>
     </main>
     <script type="module" src="./script/pages/profile.js"></script>
   </body>
