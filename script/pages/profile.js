@@ -8,6 +8,7 @@ import {
   getProfileBids,
 } from "../api/profiles.js";
 import { skeletonCard } from "../render/listing-card.js";
+import { getListingsById } from "../api/listings.js";
 
 requireAuth();
 
@@ -32,6 +33,16 @@ function getCurrentName() {
   const name = p?.name;
   if (!name) throw new Error("User profile not found");
   return name;
+}
+
+function unwrapListing(res) {
+  let x = res;
+
+  for (let i = 0; i < 3; i++) {
+    if (x && typeof x === "object" && "data" in x) x = x.data;
+    else break;
+  }
+  return x;
 }
 
 function setImgFallback(imgEl, url, fallbackText = "No image") {
@@ -153,24 +164,9 @@ async function loadBidsOnce() {
     const name = getCurrentName();
 
     const res = await getProfileBids(name, { listings: true });
-    console.log("Bids response:", res);
     const bids = res?.data ?? res ?? [];
-    console.log("Bids array:", bids);
-    console.log("First bid:", bids?.[0] ?? "No bids");
 
-    const listings = Array.isArray(bids)
-      ? bids.map((b) => b.listing).filter(Boolean)
-      : [];
-
-    const unique = [];
-    const seen = new Set();
-    for (const l of listings) {
-      if (!l?.id || seen.has(l.id)) continue;
-      seen.add(l.id);
-      unique.push(l);
-    }
-
-    if (unique.length === 0) {
+    if (!Array.isArray(bids) || bids.length === 0) {
       myBidsGrid.innerHTML = emptyState(
         "No bids yet",
         "You haven't placed any bids. Start exploring listings and place your first bid!",
@@ -178,8 +174,37 @@ async function loadBidsOnce() {
       return [];
     }
 
-    myBidsGrid.innerHTML = unique.map(listingCard).join("");
-    return unique;
+    const uniqueIds = [
+      ...new Set(bids.map((b) => b.listing?.id).filter(Boolean)),
+    ];
+
+    const fullListings = await Promise.all(
+      uniqueIds.map(async (id) => {
+        try {
+          const res = await getListingsById(id);
+          return unwrapListing(res);
+        } catch (error) {
+          console.log(`Error fetching listing ${id}:`, error);
+          return null;
+        }
+      }),
+    );
+
+    const resolved = fullListings.filter(Boolean);
+
+    console.log("Resolved[0] keys:", Object.keys(resolved[0] || {}));
+    console.log("Resolved[0] title:", resolved[0]?.title);
+
+    if (resolved.length === 0) {
+      myBidsGrid.innerHTML = emptyState(
+        "No bids yet",
+        "You haven't placed any bids. Start exploring listings and place your first bid!",
+      );
+      return [];
+    }
+
+    myBidsGrid.innerHTML = resolved.map(listingCard).join("");
+    return resolved;
   })();
 
   return cache.bids;
