@@ -1,3 +1,6 @@
+export const FALLBACK_IMAGE =
+  "data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%27600%27%20height=%27400%27%3E%3Crect%20width=%27100%25%27%20height=%27100%25%27%20fill=%27%23e5e7eb%27/%3E%3Ctext%20x=%2750%25%27%20y=%2750%25%27%20dominant-baseline=%27middle%27%20text-anchor=%27middle%27%20fill=%27%236b7280%27%20font-family=%27Arial%27%20font-size=%2722%27%3ENo%20Image%3C/text%3E%3C/svg%3E";
+
 export function getHighestBid(listing) {
   const bids = listing.bids ?? [];
   return bids.reduce((max, bid) => (bid.amount > max ? bid.amount : max), 0);
@@ -28,11 +31,16 @@ export function cardTemplate(
   const image =
     listing?.media?.length > 0 && listing.media[0].url
       ? listing.media[0].url
-      : "https://via.placeholder.com/400x300?text=No+Image";
+      : FALLBACK_IMAGE;
 
   return ` 
     <a href="${hrefBase}?id=${listing.id}" class="block rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
-      <img src="${image}" alt="${title}" class="w-full h-48 object-cover bg-zinc-200" loading="lazy" onerror="this.src='https://via.placeholder.com/400x300?text=No+Image'"/>
+      <img 
+      src="${image}" 
+      alt="${title}" 
+      class="w-full h-48 object-cover bg-zinc-200" 
+      loading="lazy" 
+      onerror='this.src="${FALLBACK_IMAGE}"'/>
       <div class="p-4">
         <h3 class="text-lg font-semibold mb-2">${title}</h3>
         <p class="text-sm text-gray-600 mb-4">${description}</p>

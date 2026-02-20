@@ -96,8 +96,7 @@ function listingCard(listing) {
     : "N/A";
 
   const media = Array.isArray(listing?.media) ? listing.media : [];
-  const img =
-    media?.[0]?.url || "https://via.placeholder.com/400x300?text=No+Image";
+  const img = media?.[0]?.url || "";
 
   const highest =
     Array.isArray(listing?.bids) && listing.bids.length

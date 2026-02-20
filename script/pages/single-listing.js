@@ -6,6 +6,7 @@ import {
   getHighestBid,
   timeLeft,
   spinnerMarkup,
+  FALLBACK_IMAGE,
 } from "../render/listing-card.js";
 import { refreshProfile } from "../api/profiles.js";
 
@@ -36,7 +37,7 @@ function singleListingTemplate(listing) {
   const media = listing?.media ?? [];
   const images = media.length
     ? media.map((m) => m.url).filter(Boolean)
-    : ["https://via.placeholder.com/600x400?text=No+Image"];
+    : [FALLBACK_IMAGE];
 
   const endsAt = listing?.endsAt
     ? new Date(listing.endsAt).toLocaleString()
@@ -56,7 +57,7 @@ function singleListingTemplate(listing) {
               alt="${title}"
               class="w-full h-90 sm:h-110 object-cover bg-zinc-100"
               loading="lazy"
-              onerror="this.src='https://via.placeholder.com/600x400?text=No+Image'"
+                onerror="this.src='${FALLBACK_IMAGE}'"
           />
           
             <button 
@@ -102,7 +103,7 @@ function singleListingTemplate(listing) {
                 alt="Thumbnail ${index + 1}"
                 class="w-full h-20 object-cover bg-zinc-200"
                 loading="lazy"
-                onerror="this.src='https://via.placeholder.com/150?text=No+Image'"
+                onerror="this.src='${FALLBACK_IMAGE}'"
               />
               </button>
             `,
@@ -168,7 +169,7 @@ function singleListingTemplate(listing) {
                 </p>
 
                 <form id="bidForm" class="mt-3 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3">
-                    <input
+                  <input
                     id="bidAmount"
                     type="number"
                     min="${highestBid + 1}"
@@ -388,11 +389,7 @@ function initBidSubmit(listingId, listing) {
       listingRoot.innerHTML = singleListingTemplate(fresh);
 
       const images = (fresh?.media ?? []).map((m) => m.url).filter(Boolean);
-      initGallery(
-        images.length
-          ? images
-          : ["https://via.placeholder.com/600x400?text=No+Image"],
-      );
+      initGallery(images.length ? images : [FALLBACK_IMAGE]);
 
       initBidSubmit(listingId, fresh);
     } catch (error) {
@@ -420,11 +417,7 @@ function initBidSubmit(listingId, listing) {
           listingRoot.innerHTML = singleListingTemplate(fresh);
 
           const images = (fresh?.media ?? []).map((m) => m.url).filter(Boolean);
-          initGallery(
-            images.length
-              ? images
-              : ["https://via.placeholder.com/600x400?text=No+Image"],
-          );
+          initGallery(images.length ? images : [FALLBACK_IMAGE]);
 
           initBidSubmit(listingId, fresh);
           return;
@@ -462,11 +455,7 @@ async function loadSingleListing() {
 
     const images = (listing?.media ?? []).map((m) => m.url).filter(Boolean);
 
-    initGallery(
-      images.length
-        ? images
-        : ["https://via.placeholder.com/600x400?text=No+Image"],
-    );
+    initGallery(images.length ? images : [FALLBACK_IMAGE]);
 
     initBidSubmit(id, listing);
   } catch (error) {
