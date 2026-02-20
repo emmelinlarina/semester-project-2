@@ -6,7 +6,9 @@ import {
   getProfileByName,
   getProfileListings,
   getProfileBids,
+  updateProfile,
 } from "../api/profiles.js";
+import { uploadImage } from "../utils/cloudinary.js";
 import { skeletonCard } from "../render/listing-card.js";
 import { getListingsById } from "../api/listings.js";
 
@@ -27,6 +29,16 @@ const tabBids = document.getElementById("tabBids");
 
 const myListingsGrid = document.getElementById("myListingsGrid");
 const myBidsGrid = document.getElementById("myBidsGrid");
+
+const editProfileBtn = document.getElementById("editProfileBtn");
+const editProfileModal = document.getElementById("editProfile");
+const editProfileClose = document.getElementById("editProfileClose");
+const editCancel = document.getElementById("editCancel");
+const editProfileForm = document.getElementById("editProfileForm");
+const editBio = document.getElementById("editBio");
+const editAvatar = document.getElementById("editAvatar");
+const editBanner = document.getElementById("editBanner");
+const editProfileMsg = document.getElementById("editProfileMsg");
 
 function getCurrentName() {
   const p = getProfile();
@@ -184,16 +196,12 @@ async function loadBidsOnce() {
           const res = await getListingsById(id);
           return unwrapListing(res);
         } catch (error) {
-          console.log(`Error fetching listing ${id}:`, error);
           return null;
         }
       }),
     );
 
     const resolved = fullListings.filter(Boolean);
-
-    console.log("Resolved[0] keys:", Object.keys(resolved[0] || {}));
-    console.log("Resolved[0] title:", resolved[0]?.title);
 
     if (resolved.length === 0) {
       myBidsGrid.innerHTML = emptyState(
@@ -226,6 +234,93 @@ async function handleTabClick(tab) {
     }
   }
 }
+
+function openEditModal() {
+  const current = getProfile();
+
+  editBio.value = current?.bio ?? "";
+  editAvatar.value = "";
+  editBanner.value = "";
+
+  editProfileMsg.textContent = "";
+  editProfileMsg.className = "text-sm";
+
+  editProfileModal.classList.remove("hidden");
+  editProfileModal.classList.add("flex");
+  editProfileModal.setAttribute("aria-hidden", "false");
+}
+
+function closeEditModal() {
+  editProfileModal.classList.add("hidden");
+  editProfileModal.classList.remove("flex");
+  editProfileModal.setAttribute("aria-hidden", "true");
+}
+
+function isValidUrlorEmpty(value) {
+  const v = value.trim();
+  if (!v) return true;
+  try {
+    new URL(v);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+editProfileBtn?.addEventListener("click", openEditModal);
+editProfileClose?.addEventListener("click", closeEditModal);
+editCancel?.addEventListener("click", closeEditModal);
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !editProfileModal.classList.contains("hidden")) {
+    closeEditModal();
+  }
+});
+
+// save
+editProfileForm?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const name = getCurrentName();
+  const bio = editBio.value;
+
+  const current = getProfile();
+
+  const avatarFile = editAvatar.files[0] ?? null;
+  const bannerFile = editBanner.files[0] ?? null;
+
+  editProfileMsg.textContent = "Saving...";
+  editProfileMsg.className = "text-zinc-600 text-sm";
+
+  try {
+    const [newAvatarUrl, newBannerUrl] = await Promise.all([
+      avatarFile ? uploadImage(avatarFile) : Promise.resolve(null),
+      bannerFile ? uploadImage(bannerFile) : Promise.resolve(null),
+    ]);
+
+    const avatarUrl = newAvatarUrl || current?.avatar?.url || "";
+    const bannerUrl = newBannerUrl || current?.banner?.url || "";
+
+    await updateProfile(name, {
+      bio,
+      avatar: avatarUrl ? { url: avatarUrl } : null,
+      banner: bannerUrl ? { url: bannerUrl } : null,
+    });
+
+    await refreshProfile();
+    await loadBaseProfile();
+    initNav();
+    renderCredits();
+
+    editProfileMsg.textContent = "Profile updated successfully!";
+    editProfileMsg.className = "text-green-600 text-sm";
+
+    setTimeout(closeEditModal, 350);
+  } catch (error) {
+    editProfileMsg.textContent = `${error?.message || "Failed to update profile."}`;
+    editProfileMsg.className = "text-red-600 text-sm";
+  }
+});
 
 renderCredits();
 
