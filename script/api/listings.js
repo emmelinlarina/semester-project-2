@@ -58,3 +58,40 @@ export async function placeBid(listingId, amount) {
     body: JSON.stringify({ amount }),
   });
 }
+
+export async function createListing({ title, description, endsAt, media }) {
+  if (!title?.trim()) throw new Error("Title is required");
+  if (!description?.trim()) throw new Error("Description is required");
+  if (!endsAt) throw new Error("End date/time is required");
+
+  const token = getToken();
+  if (!token) throw new Error("User must be logged in to create a listing");
+
+  const apiKey = getApiKey();
+
+  const end = new Date(endsAt);
+  if (Number.isNaN(end.getTime())) throw new Error("Invalid end date");
+  if (end <= new Date()) throw new Error("End date must be in the future");
+
+  const cleanedMedia = Array.isArray(media)
+    ? media
+        .filter(Boolean)
+        .map((m) => (typeof m === "string" ? { url: m } : m))
+        .filter((m) => m.url)
+    : [];
+
+  return apiFetch(`auction/listings`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(apiKey ? { "X-Noroff-API-Key": apiKey } : {}),
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      title: title.trim(),
+      description: description.trim(),
+      media: cleanedMedia,
+      endsAt: end.toISOString(),
+    }),
+  });
+}

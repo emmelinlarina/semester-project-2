@@ -40,7 +40,7 @@ export function cardTemplate(
       alt="${title}" 
       class="w-full h-48 object-cover bg-zinc-200" 
       loading="lazy" 
-      onerror='this.src="${FALLBACK_IMAGE}"'/>
+      onerror='this.onerror=null;this.src="${FALLBACK_IMAGE}"'/>
       <div class="p-4">
         <h3 class="text-lg font-semibold mb-2">${title}</h3>
         <p class="text-sm text-gray-600 mb-4">${description}</p>

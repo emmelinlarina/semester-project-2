@@ -57,7 +57,7 @@ function singleListingTemplate(listing) {
               alt="${title}"
               class="w-full h-90 sm:h-110 object-cover bg-zinc-100"
               loading="lazy"
-                onerror="this.src='${FALLBACK_IMAGE}'"
+                onerror='this.onerror=null;this.src="${FALLBACK_IMAGE}"'/>
           />
           
             <button 
@@ -103,7 +103,7 @@ function singleListingTemplate(listing) {
                 alt="Thumbnail ${index + 1}"
                 class="w-full h-20 object-cover bg-zinc-200"
                 loading="lazy"
-                onerror="this.src='${FALLBACK_IMAGE}'"
+                onerror='this.onerror=null;this.src="${FALLBACK_IMAGE}"'/>
               />
               </button>
             `,
