@@ -95,3 +95,72 @@ export async function createListing({ title, description, endsAt, media }) {
     }),
   });
 }
+
+export async function updateListing(
+  id,
+  { title, description, endsAt, media } = {},
+) {
+  if (!id) throw new Error("Listing ID is required");
+
+  const token = getToken();
+  if (!token) throw new Error("User must be logged in to update a listing");
+
+  const apiKey = getApiKey();
+  const payload = {};
+
+  if (typeof title === "string") {
+    const t = title.trim();
+    if (!t) throw new Error("Title cannot be empty");
+    payload.title = t;
+  }
+
+  if (typeof description === "string") {
+    const d = description.trim();
+    if (!d) throw new Error("Description cannot be empty");
+    payload.description = d;
+  }
+
+  if (endsAt !== undefined) {
+    const end = new Date(endsAt);
+    if (Number.isNaN(end.getTime())) throw new Error("Invalid end date");
+    if (end <= new Date()) throw new Error("End date must be in the future");
+    payload.endsAt = end.toISOString();
+  }
+
+  if (media !== undefined) {
+    const cleanedMedia = Array.isArray(media)
+      ? media
+          .filter(Boolean)
+          .map((m) => (typeof m === "string" ? { url: m } : m))
+          .filter((m) => m.url)
+      : [];
+    payload.media = cleanedMedia;
+  }
+
+  return apiFetch(`auction/listings/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...(apiKey ? { "X-Noroff-API-Key": apiKey } : {}),
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteListing(id) {
+  if (!id) throw new Error("Listing ID is required");
+
+  const token = getToken();
+  if (!token) throw new Error("User must be logged in to delete a listing");
+
+  const apiKey = getApiKey();
+
+  return apiFetch(`auction/listings/${id}`, {
+    method: "DELETE",
+    headers: {
+      ...(apiKey ? { "X-Noroff-API-Key": apiKey } : {}),
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
