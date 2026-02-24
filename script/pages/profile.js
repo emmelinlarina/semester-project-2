@@ -45,6 +45,8 @@ const listingsSubheading = document.getElementById("listingsSubheading");
 
 const editProfileBtn = document.getElementById("editProfileBtn");
 const editProfileModal = document.getElementById("editProfile");
+const editProfileWrap = document.getElementById("editProfileWrap");
+
 const editProfileClose = document.getElementById("editProfileClose");
 const editCancel = document.getElementById("editCancel");
 const editProfileForm = document.getElementById("editProfileForm");
@@ -289,7 +291,10 @@ function getCurrentName() {
 
 function isViewingOwnProfile() {
   const me = getProfile()?.name;
-  return Boolean(me && getCurrentName() === me);
+  if (!me) return false;
+
+  if (!viewedName) return true;
+  return viewedName === me;
 }
 
 function unwrapListing(res) {
@@ -448,7 +453,7 @@ async function loadBaseProfile() {
     setActiveTab("listings");
   }
 
-  editProfileBtn?.classList.toggle("hidden", !own);
+  editProfileWrap?.classList.toggle("hidden", !own);
   btn?.classList.toggle("hidden", !own);
   creditsValue?.parentElement?.classList.toggle("hidden", !own);
 
@@ -695,62 +700,73 @@ function isValidUrlorEmpty(value) {
   }
 }
 
-editProfileBtn?.addEventListener("click", openEditModal);
-editProfileClose?.addEventListener("click", closeEditModal);
-editCancel?.addEventListener("click", closeEditModal);
+function initProfileEditing() {
+  const own = isViewingOwnProfile();
 
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && !editProfileModal.classList.contains("hidden")) {
-    closeEditModal();
+  if (!own) {
+    editProfileWrap?.classList.add("hidden");
+    editProfileModal?.classList.add("hidden");
+    editProfileModal?.classList.remove("flex");
+    editProfileModal?.setAttribute("aria-hidden", "true");
+    return;
   }
-});
 
-// save
-editProfileForm?.addEventListener("submit", async (e) => {
-  e.preventDefault();
+  editProfileWrap?.addEventListener("click", openEditModal);
+  editProfileClose?.addEventListener("click", closeEditModal);
+  editCancel?.addEventListener("click", closeEditModal);
 
-  const name = getCurrentName();
-  const bio = editBio.value;
-
-  const current = getProfile();
-
-  const avatarFile = editAvatar.files[0] ?? null;
-  const bannerFile = editBanner.files[0] ?? null;
-
-  editProfileMsg.textContent = "Saving...";
-  editProfileMsg.className = "text-zinc-600 text-sm";
-
-  try {
-    const [newAvatarUrl, newBannerUrl] = await Promise.all([
-      avatarFile ? uploadImage(avatarFile) : Promise.resolve(null),
-      bannerFile ? uploadImage(bannerFile) : Promise.resolve(null),
-    ]);
-
-    const avatarUrl = newAvatarUrl || current?.avatar?.url || "";
-    const bannerUrl = newBannerUrl || current?.banner?.url || "";
-
-    await updateProfile(name, {
-      bio,
-      avatar: avatarUrl ? { url: avatarUrl } : null,
-      banner: bannerUrl ? { url: bannerUrl } : null,
-    });
-
-    await refreshProfile();
-    await loadBaseProfile();
-    initNav();
-    if (isViewingOwnProfile()) {
-      renderCredits();
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !editProfileModal.classList.contains("hidden")) {
+      closeEditModal();
     }
+  });
 
-    editProfileMsg.textContent = "Profile updated successfully!";
-    editProfileMsg.className = "text-green-600 text-sm";
+  // save
+  editProfileForm?.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-    setTimeout(closeEditModal, 350);
-  } catch (error) {
-    editProfileMsg.textContent = `${error?.message || "Failed to update profile."}`;
-    editProfileMsg.className = "text-red-600 text-sm";
-  }
-});
+    const name = getCurrentName();
+    const bio = editBio.value;
+
+    const current = getProfile();
+    const avatarFile = editAvatar.files[0] ?? null;
+    const bannerFile = editBanner.files[0] ?? null;
+
+    editProfileMsg.textContent = "Saving...";
+    editProfileMsg.className = "text-zinc-600 text-sm";
+
+    try {
+      const [newAvatarUrl, newBannerUrl] = await Promise.all([
+        avatarFile ? uploadImage(avatarFile) : Promise.resolve(null),
+        bannerFile ? uploadImage(bannerFile) : Promise.resolve(null),
+      ]);
+
+      const avatarUrl = newAvatarUrl || current?.avatar?.url || "";
+      const bannerUrl = newBannerUrl || current?.banner?.url || "";
+
+      await updateProfile(name, {
+        bio,
+        avatar: avatarUrl ? { url: avatarUrl } : null,
+        banner: bannerUrl ? { url: bannerUrl } : null,
+      });
+
+      await refreshProfile();
+      await loadBaseProfile();
+      initNav();
+      if (isViewingOwnProfile()) {
+        renderCredits();
+      }
+
+      editProfileMsg.textContent = "Profile updated successfully!";
+      editProfileMsg.className = "text-green-600 text-sm";
+
+      setTimeout(closeEditModal, 350);
+    } catch (error) {
+      editProfileMsg.textContent = `${error?.message || "Failed to update profile."}`;
+      editProfileMsg.className = "text-red-600 text-sm";
+    }
+  });
+}
 
 if (isViewingOwnProfile()) {
   renderCredits();
@@ -784,6 +800,8 @@ if (isViewingOwnProfile()) {
 }
 initNav();
 await loadBaseProfile();
+
+initProfileEditing();
 
 setActiveTab("listings");
 await loadListingsOnce();
