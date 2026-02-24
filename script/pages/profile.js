@@ -15,6 +15,11 @@ import {
   updateListing,
   deleteListing,
 } from "../api/listings.js";
+import {
+  initSearch,
+  handleSearchInput,
+  handleSearchSubmit,
+} from "../utils/search.js";
 
 requireAuth();
 const params = new URLSearchParams(window.location.search);
@@ -782,3 +787,5 @@ await loadBaseProfile();
 
 setActiveTab("listings");
 await loadListingsOnce();
+
+initSearch({ onInput: handleSearchInput, onSubmit: handleSearchSubmit });

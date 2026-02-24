@@ -3,6 +3,11 @@ import { getToken, getProfile } from "../utils/storage.js";
 import { getListingsById, placeBid } from "../api/listings.js";
 import { initNav } from "../utils/nav.js";
 import {
+  initSearch,
+  handleSearchInput,
+  handleSearchSubmit,
+} from "../utils/search.js";
+import {
   getHighestBid,
   timeLeft,
   spinnerMarkup,
@@ -465,3 +470,4 @@ async function loadSingleListing() {
 
 initNav();
 loadSingleListing();
+initSearch({ onInput: handleSearchInput, onSubmit: handleSearchSubmit });

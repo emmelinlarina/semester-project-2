@@ -3,6 +3,11 @@ import { initNav } from "../utils/nav.js";
 import { ensureAPIKey } from "../api/auth.js";
 import { createListing } from "../api/listings.js";
 import { uploadImage } from "../utils/cloudinary.js";
+import {
+  initSearch,
+  handleSearchInput,
+  handleSearchSubmit,
+} from "../utils/search.js";
 
 requireAuth();
 initNav();
@@ -231,3 +236,4 @@ form?.addEventListener("submit", async (e) => {
     if (submitBtn) submitBtn.disabled = false;
   }
 });
+initSearch({ onInput: handleSearchInput, onSubmit: handleSearchSubmit });
