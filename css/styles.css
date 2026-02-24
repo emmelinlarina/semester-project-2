@@ -902,6 +902,9 @@
   .underline {
     text-decoration-line: underline;
   }
+  .underline-offset-2 {
+    text-underline-offset: 2px;
+  }
   .opacity-50 {
     opacity: 50%;
   }
@@ -984,11 +987,6 @@
       background-color: var(--color-zinc-100);
     }
   }
-  .file\:bg-zinc-200 {
-    &::file-selector-button {
-      background-color: var(--color-zinc-200);
-    }
-  }
   .file\:px-4 {
     &::file-selector-button {
       padding-inline: calc(var(--spacing) * 4);
@@ -1009,6 +1007,13 @@
     &::file-selector-button {
       --tw-font-weight: var(--font-weight-semibold);
       font-weight: var(--font-weight-semibold);
+    }
+  }
+  .hover\:cursor-pointer {
+    &:hover {
+      @media (hover: hover) {
+        cursor: pointer;
+      }
     }
   }
   .hover\:border-brand-700 {
@@ -1127,15 +1132,6 @@
       }
     }
   }
-  .hover\:file\:bg-zinc-300 {
-    &:hover {
-      @media (hover: hover) {
-        &::file-selector-button {
-          background-color: var(--color-zinc-300);
-        }
-      }
-    }
-  }
   .focus\:border-brown-500 {
     &:focus {
       border-color: var(--color-brown-500);
@@ -1188,6 +1184,11 @@
     &:focus {
       --tw-outline-style: none;
       outline-style: none;
+    }
+  }
+  .focus-visible\:underline {
+    &:focus-visible {
+      text-decoration-line: underline;
     }
   }
   .disabled\:cursor-not-allowed {

@@ -17,6 +17,9 @@ import {
 } from "../api/listings.js";
 
 requireAuth();
+const params = new URLSearchParams(window.location.search);
+const viewedName = params.get("name");
+
 const cache = { listings: null, bids: null };
 const creditsValue = document.getElementById("creditsValue");
 const btn = document.getElementById("refreshCredits");
@@ -33,6 +36,8 @@ const tabBids = document.getElementById("tabBids");
 
 const myListingsGrid = document.getElementById("myListingsGrid");
 const myBidsGrid = document.getElementById("myBidsGrid");
+const listingsHeader = document.getElementById("listingsHeader");
+const listingsSubheading = document.getElementById("listingsSubheading");
 
 const editProfileBtn = document.getElementById("editProfileBtn");
 const editProfileModal = document.getElementById("editProfile");
@@ -267,10 +272,15 @@ editListingForm?.addEventListener("submit", async (e) => {
 });
 
 function getCurrentName() {
-  const p = getProfile();
-  const name = p?.name;
+  const me = getProfile()?.name;
+  const name = viewedName || me;
   if (!name) throw new Error("User profile not found");
   return name;
+}
+
+function isViewingOwnProfile() {
+  const me = getProfile()?.name;
+  return Boolean(me && getCurrentName() === me);
 }
 
 function unwrapListing(res) {
@@ -300,9 +310,7 @@ function renderCredits() {
 
 function showSkeletons(gridEl, count = 6) {
   if (!gridEl) return;
-  gridEl.innerHTML = Array.from({ length: count }, () => skeletonCard()).join(
-    "",
-  );
+  gridEl.innerHTML = skeletonCard(count);
 }
 
 function emptyState(title, text) {
@@ -314,7 +322,7 @@ function emptyState(title, text) {
   `;
 }
 
-function listingCard(listing) {
+function listingCard(listing, { showActions = true } = {}) {
   const id = listing?.id;
   const title = listing?.title ?? "Untitled";
   const endsAt = listing?.endsAt
@@ -329,37 +337,65 @@ function listingCard(listing) {
       ? Math.max(...listing.bids.map((b) => Number(b.amount) || 0))
       : 0;
 
+  const seller = listing?.seller?.name ?? "Unknown";
+
   return `
   <article class="rounded-lg overflow-hidden shadow-md bg-white border border-zinc-200">
-    <a href="./single-listing.html?id=${encodeURIComponent(id)}" class="block rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
+    <a 
+    href="./single-listing.html?id=${encodeURIComponent(id)}" 
+    class="block hover:shadow-lg transition-shadow duration-300"
+    >
       <div class="h-48 bg-zinc-100">
-        <img src="${img}" alt="${title}" class="w-full h-full object-cover" loading="lazy" />
+        <img 
+        src="${img}" 
+        alt="${title}" 
+        class="w-full h-full object-cover" 
+        loading="lazy" 
+        />
       </div>
+
       <div class="p-4">
       <p class="line-clamp-1 text-sm font-semibold">${title}</p>
-      <p class="text-sm text-gray-600">Current bid: ${highest} $</p>
-      <p class="text-xs text-gray-500">Ends at: ${endsAt}</p>
-    </div>
-  </a>
 
-  <div class="px-4 pb-4 flex gap-2">
-    <button
-      type="button"
-      class="editListingsBtn inline-flex items-center gap-2 rounded-full bg-zinc-200 px-4 py-2 text-xs font-semibold hover:bg-zinc-300 transition"
-      data-id="${id}"
-    >
-      <i class="fas fa-pen"></i> Edit
-    </button>
-    <button
-      type="button"
-      class="deleteListingsBtn inline-flex items-center gap-2 rounded-full bg-red-500 text-white px-4 py-2 text-xs font-semibold hover:bg-red-600 transition"
-      data-id="${id}"
-    > 
-      <i class="fas fa-trash"></i> Delete
-    </button>
-  </div>
-</article>
-  `;
+        <div class="mt-2 flex items-center justify-between gap-3">
+          <p class="text-sm text-gray-600">Current bid: ${highest} $</p>
+          <p class="text-xs text-gray-500">Ends at: ${endsAt}</p>
+        </div>
+      </div>
+    </a>
+
+    <div class="px-4 pb-4 flex items-center justify-between gap-3">
+        <a
+         href="./user-profile.html?name=${encodeURIComponent(seller)}" 
+         class="text-xs text-gray-700 hover:underline underline-offset-2 focus-visible:underline"
+         aria-label="View profile of ${seller}"
+         >
+          @${seller}
+        </a>
+  
+      ${
+        showActions
+          ? `<div class="flex gap-2">
+            <button 
+              type="button"
+              class="editListingsBtn inline-flex items-center gap-2 rounded-full bg-zinc-200 px-4 py-2 text-xs font-semibold hover:bg-zinc-300 transition"
+              data-id="${id}"
+            >
+              <i class="fas fa-pen"></i> Edit
+            </button>
+            <button
+              type="button"
+              class="deleteListingsBtn inline-flex items-center gap-2 rounded-full bg-red-500 text-white px-4 py-2 text-xs font-semibold hover:bg-red-600 transition"
+              data-id="${id}"
+            >
+              <i class="fas fa-trash"></i> Delete
+            </button>
+          </div>`
+          : ""
+      }
+      </div>
+      </article>
+      `;
 }
 
 function setActiveTab(tab) {
@@ -380,6 +416,36 @@ async function loadBaseProfile() {
 
   titleEl.textContent = profile?.name ?? "Unknown User";
   bioEl.textContent = profile?.bio?.trim() ? profile.bio : "No bio yet.";
+
+  const own = isViewingOwnProfile();
+  const displayName = profile?.name ?? "User";
+
+  if (listingsHeader)
+    listingsHeader.textContent = own
+      ? "My Listings"
+      : `${displayName}'s Listings`;
+  if (listingsSubheading)
+    listingsSubheading.textContent = own
+      ? "Listings you created"
+      : `Listings created by ${displayName}`;
+
+  const tabListingsBtn = document.querySelector('.tabBtn[data-tab="listings"]');
+  if (tabListingsBtn)
+    tabListingsBtn.textContent = own
+      ? "My Listings"
+      : `${displayName}'s Listings`;
+  const bidsTabBtn = document.querySelector('.tabBtn[data-tab="bids"]');
+
+  bidsTabBtn?.classList.toggle("hidden", !own);
+  tabBids?.classList.toggle("hidden", !own);
+
+  if (!own) {
+    setActiveTab("listings");
+  }
+
+  editProfileBtn?.classList.toggle("hidden", !own);
+  btn?.classList.toggle("hidden", !own);
+  creditsValue?.parentElement?.classList.toggle("hidden", !own);
 
   setImgFallback(avatarEl, profile?.avatar?.url, "Profile avatar");
   setImgFallback(bannerEl, profile?.banner?.url, "Profile banner");
@@ -403,7 +469,10 @@ async function loadListingsOnce(force = false) {
       return [];
     }
 
-    myListingsGrid.innerHTML = listings.map(listingCard).join("");
+    const showActions = isViewingOwnProfile();
+    myListingsGrid.innerHTML = listings
+      .map((listing) => listingCard(listing, { showActions }))
+      .join("");
     return listings;
   })();
 
@@ -453,7 +522,9 @@ async function loadBidsOnce() {
       return [];
     }
 
-    myBidsGrid.innerHTML = resolved.map(listingCard).join("");
+    myBidsGrid.innerHTML = resolved
+      .map((listing) => listingCard(listing, { showActions: false }))
+      .join("");
     return resolved;
   })();
 
@@ -461,6 +532,13 @@ async function loadBidsOnce() {
 }
 
 async function handleTabClick(tab) {
+  const own = isViewingOwnProfile();
+
+  if (tab === "bids" && !own) {
+    setActiveTab("listings");
+    return;
+  }
+
   setActiveTab(tab);
 
   try {
@@ -552,7 +630,9 @@ editProfileForm?.addEventListener("submit", async (e) => {
     await refreshProfile();
     await loadBaseProfile();
     initNav();
-    renderCredits();
+    if (isViewingOwnProfile()) {
+      renderCredits();
+    }
 
     editProfileMsg.textContent = "Profile updated successfully!";
     editProfileMsg.className = "text-green-600 text-sm";
@@ -564,7 +644,9 @@ editProfileForm?.addEventListener("submit", async (e) => {
   }
 });
 
-renderCredits();
+if (isViewingOwnProfile()) {
+  renderCredits();
+}
 
 btn?.addEventListener("click", async () => {
   msg.textContent = "";
@@ -572,7 +654,9 @@ btn?.addEventListener("click", async () => {
 
   try {
     await refreshProfile();
-    renderCredits();
+    if (isViewingOwnProfile()) {
+      renderCredits();
+    }
     initNav();
     msg.textContent = `Credits updated!`;
     msg.className = "text-green-600";
@@ -587,7 +671,9 @@ tabBtns.forEach((b) => {
 });
 
 await refreshProfile();
-renderCredits();
+if (isViewingOwnProfile()) {
+  renderCredits();
+}
 initNav();
 await loadBaseProfile();
 

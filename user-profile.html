@@ -288,6 +288,7 @@
 
           <div class="mt-3 grid gap-2">
             <button
+              id="tabListingsBtn"
               data-tab="listings"
               class="tabBtn w-full text-left rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-semibold hover:bg-zinc-100"
               type="button"
@@ -296,6 +297,7 @@
             </button>
 
             <button
+              id="tabBidsBtn"
               data-tab="bids"
               class="tabBtn w-full text-left rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-semibold hover:bg-zinc-100"
               type="button"
@@ -307,8 +309,12 @@
 
         <div class="min-h-60">
           <div id="tabListings" class="tabPanel">
-            <h2 class="text-lg font-semibold">My Listings</h2>
-            <p class="mt-1 text-sm text-zinc-500">Listings you created</p>
+            <h2 id="listingsHeader" class="text-lg font-semibold">
+              My Listings
+            </h2>
+            <p id="listingsSubheading" class="mt-1 text-sm text-zinc-500">
+              Listings you created
+            </p>
 
             <div
               id="myListingsGrid"

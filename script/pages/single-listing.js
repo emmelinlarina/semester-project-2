@@ -135,7 +135,7 @@ function singleListingTemplate(listing) {
             <div class="mt-6 grid grid-cols-2 gap-3 text-sm">
                 <div class="rounded-2xl bg-zinc-50 border border-zinc-200 p-4"> 
                     <p class="text-gray-500">Seller</p>
-                    <p class="font-medium">${seller}</p>
+                    <a href="./user-profile.html?name=${encodeURIComponent(seller)}" class="font-medium text-zinc-900 hover:underline underline-offset-2 focus-visible:underline">${seller}</a>
                 </div>
 
                 
@@ -235,7 +235,7 @@ function renderBidHistory(bids = []) {
       return `
         <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-3 flex items-center justify-between gap-4">
           <div class="min-w-0">
-            <p class="text-sm font-medium text-gray-900 truncate">${name}</p>
+            <a href="./user-profile.html?name=${encodeURIComponent(name)}" class="text-sm font-medium text-zinc-900 hover:underline underline-offset-2 focus-visible:underline">${name}</a>
             <p class="text-sm text-gray-500">${t}</p>
           </div>
           <p class="text-sm font-semibold text-gray-900">${amount} $</p>

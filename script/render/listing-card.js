@@ -33,8 +33,10 @@ export function cardTemplate(
       ? listing.media[0].url
       : FALLBACK_IMAGE;
 
+  const sellerName = listing?.seller?.name ?? "Unknown";
+
   return ` 
-    <a href="${hrefBase}?id=${listing.id}" class="block rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
+    <a href="${hrefBase}?id=${listing.id}" class="block rounded-lg transition-shadow duration-300">
       <img 
       src="${image}" 
       alt="${title}" 
@@ -43,10 +45,15 @@ export function cardTemplate(
       onerror='this.onerror=null;this.src="${FALLBACK_IMAGE}"'/>
       <div class="p-4">
         <h3 class="text-lg font-semibold mb-2">${title}</h3>
+        <span class="text-xs text-gray-500">${time}</span>
         <p class="text-sm text-gray-600 mb-4">${description}</p>
         <div class="flex items-center justify-between">
           <span class="text-sm font-bold">${bid} $</span>
-          <span class="text-xs text-gray-500">${time}</span>
+          <a href="./user-profile.html?name=${encodeURIComponent(sellerName)}"
+          class="text-xs text-zinc-700 hover:underline underline-offset-2 focus-visible:underline"
+          aria-label='View profile of ${sellerName}'
+          >
+          @${sellerName}</a>
         </div>
       </div>
     </a>
