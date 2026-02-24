@@ -34,7 +34,6 @@ const tabBtns = document.querySelectorAll(".tabBtn");
 const tabListings = document.getElementById("tabListings");
 const tabBids = document.getElementById("tabBids");
 
-const myListingsGrid = document.getElementById("myListingsGrid");
 const myBidsGrid = document.getElementById("myBidsGrid");
 const listingsHeader = document.getElementById("listingsHeader");
 const listingsSubheading = document.getElementById("listingsSubheading");
@@ -58,10 +57,16 @@ const editListingTitle = document.getElementById("editListingTitle");
 const editListingDescription = document.getElementById(
   "editListingDescription",
 );
+
 const editListingEndsAt = document.getElementById("editListingEndsAt");
 const editListingMedia = document.getElementById("editListingMedia");
 const editListingPreview = document.getElementById("editListingPreview");
 const editListingMsg = document.getElementById("editListingMsg");
+
+const activeListingsHeader = document.getElementById("activeListingsHeader");
+const activeListingsGrid = document.getElementById("activeListingsGrid");
+const expiredListingsHeader = document.getElementById("expiredListingsHeader");
+const expiredListingsGrid = document.getElementById("expiredListingsGrid");
 
 let editListingId = null;
 let editObjectUrls = [];
@@ -175,12 +180,12 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-myListingsGrid?.addEventListener("click", async (e) => {
+async function onListingsGridClick(e) {
   const editBtn = e.target.closest(".editListingsBtn");
   const delBtn = e.target.closest(".deleteListingsBtn");
   if (!editBtn && !delBtn) return;
 
-  const id = (editBtn || delBtn)?.dataset?.id;
+  const id = (editBtn || delBtn).dataset.id;
   if (!id) return;
 
   if (delBtn) {
@@ -197,27 +202,26 @@ myListingsGrid?.addEventListener("click", async (e) => {
     return;
   }
 
-  // EDIT
-  if (editBtn) {
-    try {
-      const res = await getListingsById(id);
-      const listing = unwrapListing(res);
+  try {
+    const res = await getListingsById(id);
+    const listings = unwrapListing(res);
 
-      editListingId = id;
+    editListingId = id;
+    editListingTitle.value = listings?.title ?? "";
+    editListingDescription.value = listings?.description ?? "";
+    editListingEndsAt.value = toDatetimeLocal(listings?.endsAt);
 
-      editListingTitle.value = listing?.title ?? "";
-      editListingDescription.value = listing?.description ?? "";
-      editListingEndsAt.value = toDatetimeLocal(listing?.endsAt);
+    if (editListingMedia) editListingMedia.value = "";
+    if (editListingPreview) editListingPreview.innerHTML = "";
 
-      if (editListingMedia) editListingMedia.value = "";
-      if (editListingPreview) editListingPreview.innerHTML = "";
-
-      openEditListingModal();
-    } catch (error) {
-      alert(error?.message || "Failed to load listing details.");
-    }
+    openEditListingModal();
+  } catch (error) {
+    alert(error?.message || "Failed to load listing details.");
   }
-});
+}
+
+activeListingsGrid?.addEventListener("click", onListingsGridClick);
+expiredListingsGrid?.addEventListener("click", onListingsGridClick);
 
 editListingForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -421,9 +425,7 @@ async function loadBaseProfile() {
   const displayName = profile?.name ?? "User";
 
   if (listingsHeader)
-    listingsHeader.textContent = own
-      ? "My Listings"
-      : `${displayName}'s Listings`;
+    listingsHeader.textContent = own ? "Listings" : `${displayName}'s Listings`;
   if (listingsSubheading)
     listingsSubheading.textContent = own
       ? "Listings you created"
@@ -431,9 +433,7 @@ async function loadBaseProfile() {
 
   const tabListingsBtn = document.querySelector('.tabBtn[data-tab="listings"]');
   if (tabListingsBtn)
-    tabListingsBtn.textContent = own
-      ? "My Listings"
-      : `${displayName}'s Listings`;
+    tabListingsBtn.textContent = own ? "Listings" : `${displayName}'s Listings`;
   const bidsTabBtn = document.querySelector('.tabBtn[data-tab="bids"]');
 
   bidsTabBtn?.classList.toggle("hidden", !own);
@@ -455,24 +455,85 @@ async function loadListingsOnce(force = false) {
   if (cache.listings && !force) return cache.listings;
 
   cache.listings = (async () => {
-    showSkeletons(myListingsGrid, 6);
-    const name = getCurrentName();
+    if (expiredListingsGrid) expiredListingsGrid.innerHTML = "";
+    if (activeListingsHeader) activeListingsHeader.innerHTML = "";
+    if (expiredListingsHeader) expiredListingsHeader.innerHTML = "";
+    if (activeListingsGrid) showSkeletons(activeListingsGrid, 6);
 
-    const res = await getProfileListings(name, { limit: 12, page: 1 });
+    const name = getCurrentName();
+    const res = await getProfileListings(name, { limit: 50, page: 1 });
     const listings = res?.data ?? res ?? [];
 
     if (!Array.isArray(listings) || listings.length === 0) {
-      myListingsGrid.innerHTML = emptyState(
-        "No listings yet",
-        "You haven't created any listings. Start selling your items now!",
-      );
+      if (activeListingsGrid) {
+        activeListingsGrid.innerHTML = emptyState(
+          "No listings yet",
+          "You haven't created any listings. Start selling your items now!",
+        );
+      }
       return [];
     }
+    if (expiredListingsGrid) expiredListingsGrid.innerHTML = "";
+    if (activeListingsHeader) activeListingsHeader.innerHTML = "";
+    if (expiredListingsHeader) expiredListingsHeader.innerHTML = "";
+
+    const now = Date.now();
+    const active = [];
+    const expired = [];
+
+    for (const listing of listings) {
+      const ends = new Date(listing?.endsAt ?? 0).getTime();
+      const isExpired = !Number.isFinite(ends) || ends <= now;
+      (isExpired ? expired : active).push(listing);
+    }
+
+    active.sort(
+      (a, b) => new Date(a.endsAt).getTime() - new Date(b.endsAt).getTime(),
+    );
+    expired.sort(
+      (a, b) => new Date(b.endsAt).getTime() - new Date(a.endsAt).getTime(),
+    );
 
     const showActions = isViewingOwnProfile();
-    myListingsGrid.innerHTML = listings
-      .map((listing) => listingCard(listing, { showActions }))
-      .join("");
+
+    const section = (label, count) => `
+    <div class="col-span-full">
+      <div class="flex items-center justify-between mb-2">
+        <p class="text-sm font-semibold text-gray-700">${label}</p>
+        <span class="text-sm text-gray-500">${count} ${count === 1 ? "listing" : "listings"}</span>
+      </div>
+    </div>
+  `;
+
+    if (activeListingsHeader) {
+      activeListingsHeader.innerHTML = section(
+        "Active Listings",
+        active.length,
+      );
+    }
+
+    if (activeListingsGrid) {
+      activeListingsGrid.innerHTML = active.length
+        ? active.map((l) => listingCard(l, { showActions })).join("")
+        : emptyState(
+            "No active listings",
+            "You haven't created any active listings. Start selling your items now!",
+          );
+    }
+
+    if (expiredListingsHeader) {
+      expiredListingsHeader.innerHTML = section(
+        "Expired Listings",
+        expired.length,
+      );
+    }
+
+    if (expiredListingsGrid) {
+      expiredListingsGrid.innerHTML = expired.length
+        ? expired.map((l) => listingCard(l, { showActions })).join("")
+        : emptyState("No expired listings", "");
+    }
+
     return listings;
   })();
 
@@ -522,10 +583,52 @@ async function loadBidsOnce() {
       return [];
     }
 
-    myBidsGrid.innerHTML = resolved
-      .map((listing) => listingCard(listing, { showActions: false }))
-      .join("");
-    return resolved;
+    const now = Date.now();
+    const active = [];
+    const expired = [];
+
+    for (const listing of resolved) {
+      const ends = new Date(listing?.endsAt ?? 0).getTime();
+      const isExpired = !Number.isFinite(ends) || ends <= now;
+      (isExpired ? expired : active).push(listing);
+    }
+
+    active.sort(
+      (a, b) => new Date(a.endsAt).getTime() - new Date(b.endsAt).getTime(),
+    );
+    expired.sort(
+      (a, b) => new Date(b.endsAt).getTime() - new Date(a.endsAt).getTime(),
+    );
+
+    const section = (label) => `
+      <div class="col-span-full mt-4">
+        <p class="text-sm font-semibold text-gray-700 mb-2">${label}</p>
+      </div>
+    `;
+
+    const htmlParts = [
+      ...(active.length
+        ? [
+            section("Active Bids"),
+            ...active.map((l) => listingCard(l, { showActions: false })),
+          ]
+        : []),
+      ...(expired.length
+        ? [
+            section("Expired Bids"),
+            ...expired.map((l) => listingCard(l, { showActions: false })),
+          ]
+        : []),
+    ];
+    myBidsGrid.innerHTML = htmlParts.join("");
+
+    myBidsGrid.innerHTML = htmlParts.length
+      ? htmlParts.join("")
+      : emptyState(
+          "No bids yet",
+          "You haven't placed any bids. Start exploring listings and place your first bid!",
+        );
+    return { active, expired };
   })();
 
   return cache.bids;
@@ -545,7 +648,7 @@ async function handleTabClick(tab) {
     if (tab === "listings") await loadListingsOnce();
     if (tab === "bids") await loadBidsOnce();
   } catch (error) {
-    const box = tab === "listings" ? myListingsGrid : myBidsGrid;
+    const box = tab === "listings" ? activeListingsGrid : myBidsGrid;
     if (box) {
       box.innerHTML = `<div class="col-span-full rounded-3xl bg-red-50 p-6 text-center">
         <h2 class="text-xl font-semibold text-red-700">Error loading ${tab}</h2>

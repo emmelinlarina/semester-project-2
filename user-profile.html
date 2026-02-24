@@ -309,21 +309,26 @@
 
         <div class="min-h-60">
           <div id="tabListings" class="tabPanel">
-            <h2 id="listingsHeader" class="text-lg font-semibold">
-              My Listings
-            </h2>
+            <h2 id="listingsHeader" class="text-lg font-semibold">Listings</h2>
             <p id="listingsSubheading" class="mt-1 text-sm text-zinc-500">
               Listings you created
             </p>
 
+            <div id="activeListingsHeader" class="mt-4"></div>
             <div
-              id="myListingsGrid"
-              class="mt-4 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+              id="activeListingsGrid"
+              class="mt-3 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+            ></div>
+
+            <div id="expiredListingsHeader" class="mt-10"></div>
+            <div
+              id="expiredListingsGrid"
+              class="mt-3 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
             ></div>
           </div>
 
           <div id="tabBids" class="tabPanel hidden">
-            <h2 class="text-lg font-semibold">My Bids</h2>
+            <h2 class="text-lg font-semibold">Bids</h2>
             <p class="mt-1 text-sm text-zinc-500">Bids you placed</p>
             <div
               id="myBidsGrid"
