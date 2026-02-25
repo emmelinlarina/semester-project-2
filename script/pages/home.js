@@ -1,21 +1,119 @@
 import { getListings } from "../api/listings.js";
-import { ensureAPIKey } from "../api/auth.js";
 import { initNav } from "../utils/nav.js";
-import { initSearch } from "../utils/search.js";
 import {
   getHighestBid,
   renderGrid,
   skeletonCard,
-  cardTemplate,
 } from "../render/listing-card.js";
 
 initNav();
+
+function renderHome() {
+  return `
+      <section
+        class="rounded-3xl bg-zinc-100 border border-zinc-200 flex flex-col items-start justify-center px-6 py-4"
+      >
+        <h1 class="text-3xl sm:text-4xl md:text-5xl tracking-wide">BRAND</h1>
+      </section>
+
+      <!-- highlighted auctions -->
+      <section class="mt-10 font-rasa">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xl font-semibold tracking-widest text-zinc-700">
+            HIGHLIGHTED AUCTIONS
+          </h2>
+        </div>
+        <div
+          class="mt-4 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 min-h-95"
+          id="highlightedGrid"
+        ></div>
+      </section>
+
+      <!-- gallery -->
+      <section class="mt-12 font-rasa">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xl font-semibold tracking-widest text-zinc-700">
+            GALLERY
+          </h2>
+          <p
+            id="searchStatus"
+            class="h-5 text-sm text-zinc-500 flex items-center justify-end"
+          ></p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-zinc-500">SORT BY</span>
+          <select
+            id="sortSelect"
+            class="rounded-full bg-zinc-100 border border-zinc-200 px-3 py-2 text-sm"
+          >
+            <option value="endsSoon">Ending soon</option>
+            <option value="endsLate">Ending late</option>
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
+          </select>
+        </div>
+
+        <!-- gallery search -->
+        <form id="gallerySearchForm" class="flex items-center gap-2">
+          <input
+            type="search"
+            id="gallerySearchInput"
+            placeholder="Search gallery"
+            class="w-full sm:w-56 rounded-full border border-zinc-200 bg-zinc-100 px-5 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-300"
+          />
+          <button
+            type="submit"
+            class="rounded-full bg-zinc-200 px-4 py-2 text-sm font-semibold hover:bg-zinc-300 transition"
+          >
+            Search
+          </button>
+          <button
+            id="galleryClearBtn"
+            type="button"
+            class="rounded-full bg-zinc-100 px-4 py-2 text-sm hover:bg-zinc-200 transition"
+          >
+            Clear
+          </button>
+        </form>
+
+        <div
+          class="mt-4 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+          id="galleryGrid"
+        ></div>
+        <!-- Pagination -->
+        <div class="mt-6 flex items-center justify-center gap-4">
+          <button
+            id="prevBtn"
+            class="rounded-full bg-zinc-200 px-6 py-2 text-sm font-semibold hover:bg-zinc-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Previous
+          </button>
+          <span id="pageNumber" class="text-sm font-semibold">1</span>
+          <button
+            id="nextBtn"
+            class="rounded-full bg-zinc-200 px-6 py-2 text-sm font-semibold hover:bg-zinc-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Next
+          </button>
+        </div>
+      </section>
+    `;
+}
+
+function mountHome() {
+  const mount = document.getElementById("homeMount");
+  if (!mount) throw new Error("Home mount not found");
+  mount.innerHTML = renderHome();
+}
+
+mountHome();
+
 const highlightedGrid = document.getElementById("highlightedGrid");
 const galleryGrid = document.getElementById("galleryGrid");
 const sortSelect = document.getElementById("sortSelect");
 
 const searchStatus = document.getElementById("searchStatus");
-const searchResults = document.getElementById("searchResults");
 
 const gallerySearchForm = document.getElementById("gallerySearchForm");
 const gallerySearchInput = document.getElementById("gallerySearchInput");
@@ -25,15 +123,11 @@ const prevBtn = document.getElementById("prevBtn");
 const nextBtn = document.getElementById("nextBtn");
 const pageNumber = document.getElementById("pageNumber");
 
-//config
 const LIMIT = 12;
 
-// feed
 let listings = [];
-let searchPool = [];
 let galleryQuery = "";
 let isGallerySearching = false;
-let navQuery = "";
 
 let currentPage = 1;
 let currentSort = "endsAt";
@@ -51,7 +145,7 @@ function pickHighlighted(items) {
 function updatePagerUI(count = listings.length) {
   if (pageNumber) pageNumber.textContent = String(currentPage);
 
-  if (galleryQuery) {
+  if (isGallerySearching) {
     if (prevBtn) prevBtn.disabled = true;
     if (nextBtn) nextBtn.disabled = true;
     return;
@@ -74,27 +168,6 @@ function filterLocalListings(q) {
   });
 }
 
-function filterPool(q) {
-  const queryLower = (q || "").toLowerCase();
-  if (!queryLower) return [];
-  return searchPool.filter((item) => {
-    const title = item.title?.toLowerCase() ?? "";
-    const description = item.description?.toLowerCase() ?? "";
-    return title.includes(queryLower) || description.includes(queryLower);
-  });
-}
-
-function renderSearchResults(items) {
-  if (!searchResults) return;
-
-  if (!items.length) {
-    searchResults.innerHTML = `<p class="text-sm text-zinc-600">No results found.</p>`;
-    return;
-  }
-
-  searchResults.innerHTML = items.slice(0, 10).map(cardTemplate).join("");
-}
-
 async function loadHighlighted() {
   if (!highlightedLoaded && highlightedGrid) {
     highlightedGrid.innerHTML = skeletonCard(3);
@@ -109,9 +182,7 @@ async function loadHighlighted() {
   });
 
   const items = res?.data ?? [];
-  highlightedListings = [...items]
-    .sort((a, b) => getHighestBid(b) - getHighestBid(a))
-    .slice(0, 3);
+  highlightedListings = pickHighlighted(items);
 
   renderGrid(highlightedGrid, highlightedListings);
   highlightedLoaded = true;
@@ -159,43 +230,19 @@ async function loadListings() {
   }
 }
 
-async function loadSearchPool() {
-  try {
-    const res = await getListings({
-      limit: 100,
-      page: 1,
-      sort: "endsAt",
-      sortOrder: "asc",
-      active: true,
-    });
-
-    searchPool = res?.data ?? [];
-  } catch (err) {
-    console.error("Error loading search pool:", err);
-    searchPool = [];
-  }
-}
-
-//events
 sortSelect?.addEventListener("change", async () => {
   const value = sortSelect.value;
 
   if (value === "endsSoon") {
     currentSort = "endsAt";
     currentOrder = "asc";
-  }
-
-  if (value === "endsLate") {
+  } else if (value === "endsLate") {
     currentSort = "endsAt";
     currentOrder = "desc";
-  }
-
-  if (value === "newest") {
+  } else if (value === "newest") {
     currentSort = "created";
     currentOrder = "desc";
-  }
-
-  if (value === "oldest") {
+  } else if (value === "oldest") {
     currentSort = "created";
     currentOrder = "asc";
   }
@@ -230,20 +277,6 @@ galleryClearBtn?.addEventListener("click", async () => {
   isGallerySearching = false;
   currentPage = 1;
   await loadListings();
-});
-
-await loadSearchPool();
-initSearch({
-  onInput: (q) => {
-    navQuery = (q || "").trim();
-    const matches = filterPool(navQuery);
-    renderSearchResults(matches);
-  },
-  onSubmit: (q) => {
-    navQuery = (q || "").trim();
-    const matches = filterPool(navQuery);
-    renderSearchResults(matches);
-  },
 });
 
 loadHighlighted();
