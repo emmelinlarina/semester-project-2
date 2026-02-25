@@ -1,10 +1,5 @@
-<<<<<<< HEAD
 import { requireAuth } from "../utils/guard.js";
 import { initNav, updateNavUI } from "../utils/nav.js";
-=======
-import { isAuthed } from "../utils/guard.js";
-import { initNav } from "../utils/nav.js";
->>>>>>> 0bd98573f8fe6601a329a63721bbffe7e1f5cc49
 import { getProfile } from "../utils/storage.js";
 import {
   refreshProfile,
@@ -16,23 +11,13 @@ import {
 import { uploadImage } from "../utils/cloudinary.js";
 import { skeletonCard } from "../render/listing-card.js";
 import {
-  getListings,
   getListingsById,
   updateListing,
   deleteListing,
 } from "../api/listings.js";
-import {
-  initSearch,
-  handleSearchInput,
-  handleSearchSubmit,
-} from "../utils/search.js";
 
-<<<<<<< HEAD
 requireAuth();
 initNav();
-=======
-const isAuthedUser = isAuthed();
->>>>>>> 0bd98573f8fe6601a329a63721bbffe7e1f5cc49
 const params = new URLSearchParams(window.location.search);
 const viewedName = params.get("name");
 
@@ -238,7 +223,7 @@ async function onListingsGridClick(e) {
   }
 }
 
-if (isAuthedUser && isViewingOwnProfile()) {
+if (isViewingOwnProfile()) {
   activeListingsGrid?.addEventListener("click", onListingsGridClick);
   expiredListingsGrid?.addEventListener("click", onListingsGridClick);
 }
@@ -296,12 +281,10 @@ editListingForm?.addEventListener("submit", async (e) => {
 });
 
 function getCurrentName() {
-  if (viewedName) return viewedName;
-
   const me = getProfile()?.name;
-  if (me) return me;
-
-  return null;
+  const name = viewedName || me;
+  if (!name) throw new Error("Unable to determine profile name");
+  return name;
 }
 
 function isViewingOwnProfile() {
@@ -349,42 +332,6 @@ function emptyState(title, text) {
       <p class="mt-2 text-gray-600">${text}</p>
     </div>
   `;
-}
-
-function isAuthMissingError(error) {
-  const msg = String(error?.message || "").toLowerCase();
-  return (
-    msg.includes("no authorization header") ||
-    msg.includes("must be logged in") ||
-    msg.includes("unauthorized")
-  );
-}
-
-async function getPublicListingsBySeller(name, { maxPages = 5 } = {}) {
-  const sellerName = String(name || "").trim();
-  if (!sellerName) return [];
-
-  const pageSize = 100;
-  const matched = [];
-
-  for (let page = 1; page <= maxPages; page++) {
-    const res = await getListings({
-      limit: pageSize,
-      page,
-      sort: "created",
-      sortOrder: "desc",
-      active: false,
-    });
-
-    const items = res?.data ?? res ?? [];
-    if (!Array.isArray(items) || items.length === 0) break;
-
-    matched.push(...items.filter((item) => item?.seller?.name === sellerName));
-
-    if (items.length < pageSize) break;
-  }
-
-  return matched;
 }
 
 function listingCard(listing, { showActions = true } = {}) {
@@ -475,75 +422,49 @@ function setActiveTab(tab) {
 }
 
 async function loadBaseProfile() {
-  let profile;
+  try {
+    const name = getCurrentName();
+    const res = await getProfileByName(name);
+    const profile = res?.data ?? res;
 
-  if (!isAuthedUser && viewedName) {
-    profile = {
-      name: viewedName,
-      bio: "",
-      avatar: null,
-      banner: null,
-    };
-  }
+    titleEl.textContent = profile?.name ?? "Unknown User";
+    bioEl.textContent = profile?.bio?.trim() ? profile.bio : "No bio yet.";
 
-  if (!profile) {
-    try {
-      const name = getCurrentName();
-      const res = await getProfileByName(name);
-      profile = res?.data ?? res;
-    } catch (error) {
-      if (!isAuthedUser && viewedName && isAuthMissingError(error)) {
-        profile = {
-          name: viewedName,
-          bio: "",
-          avatar: null,
-          banner: null,
-        };
-      } else {
-        titleEl.textContent = "Profile not found";
-        bioEl.textContent = "";
-        return;
-      }
-    }
-  }
+    const own = isViewingOwnProfile();
+    const displayName = profile?.name ?? "User";
 
-  titleEl.textContent = profile?.name ?? "Unknown User";
-  bioEl.textContent = profile?.bio?.trim()
-    ? profile.bio
-    : !isAuthedUser && viewedName
-      ? "Public profile view. Log in to see full profile details."
-      : "No bio yet.";
-
-  const own = isViewingOwnProfile();
-  const displayName = profile?.name ?? "User";
-
-  if (listingsHeader)
     listingsHeader.textContent = own ? "Listings" : `${displayName}'s Listings`;
-  if (listingsSubheading)
     listingsSubheading.textContent = own
       ? "Listings you created"
       : `Listings created by ${displayName}`;
 
-  const tabListingsBtn = document.querySelector('.tabBtn[data-tab="listings"]');
-  if (tabListingsBtn)
-    tabListingsBtn.textContent = own ? "Listings" : `${displayName}'s Listings`;
-  const bidsTabBtn = document.querySelector('.tabBtn[data-tab="bids"]');
+    const tabListingsBtn = document.querySelector(
+      '.tabBtn[data-tab="listings"]',
+    );
+    if (tabListingsBtn)
+      tabListingsBtn.textContent = own
+        ? "Listings"
+        : `${displayName}'s Listings`;
 
-  bidsTabBtn?.classList.toggle("hidden", !own);
-  tabBids?.classList.toggle("hidden", !own);
+    const bidsTabBtn = document.querySelector('.tabBtn[data-tab="bids"]');
+    bidsTabBtn?.classList.toggle("hidden", !own);
+    tabBids?.classList.toggle("hidden", !own);
 
-  if (!own) {
-    setActiveTab("listings");
+    if (!own) {
+      setActiveTab("listings");
+    }
+
+    editProfileWrap?.classList.toggle("hidden", !own);
+    btn?.classList.toggle("hidden", !own);
+    creditsValue?.parentElement?.classList.toggle("hidden", !own);
+
+    setImgFallback(avatarEl, profile?.avatar?.url, "Profile avatar");
+    setImgFallback(bannerEl, profile?.banner?.url, "Profile banner");
+  } catch (error) {
+    titleEl.textContent = "Profile not found";
+    bioEl.textContent = "";
   }
-
-  editProfileWrap?.classList.toggle("hidden", !own);
-  btn?.classList.toggle("hidden", !own);
-  creditsValue?.parentElement?.classList.toggle("hidden", !own);
-
-  setImgFallback(avatarEl, profile?.avatar?.url, "Profile avatar");
-  setImgFallback(bannerEl, profile?.banner?.url, "Profile banner");
 }
-
 async function loadListingsOnce(force = false) {
   if (cache.listings && !force) return cache.listings;
 
@@ -556,20 +477,8 @@ async function loadListingsOnce(force = false) {
     const name = getCurrentName();
     let listings;
 
-    if (!isAuthedUser && viewedName) {
-      listings = await getPublicListingsBySeller(name);
-    } else {
-      try {
-        const res = await getProfileListings(name, { limit: 50, page: 1 });
-        listings = res?.data ?? res ?? [];
-      } catch (error) {
-        if (!isAuthedUser && viewedName && isAuthMissingError(error)) {
-          listings = await getPublicListingsBySeller(name);
-        } else {
-          throw error;
-        }
-      }
-    }
+    const res = await getProfileListings(name, { limit: 50, page: 1 });
+    listings = res?.data ?? res ?? [];
 
     if (!Array.isArray(listings) || listings.length === 0) {
       if (activeListingsGrid) {
@@ -744,7 +653,7 @@ async function loadBidsOnce() {
 async function handleTabClick(tab) {
   const own = isViewingOwnProfile();
 
-  if (tab === "bids" && (!isAuthedUser || !own)) {
+  if (tab === "bids" && !own) {
     setActiveTab("listings");
     return;
   }
@@ -891,22 +800,12 @@ tabBtns.forEach((b) => {
   b.addEventListener("click", () => handleTabClick(b.dataset.tab));
 });
 
-<<<<<<< HEAD
 await refreshProfile();
 updateNavUI();
-if (isViewingOwnProfile()) {
-  renderCredits();
-=======
-if (isAuthed()) {
-  await refreshProfile();
-  if (isViewingOwnProfile()) renderCredits();
->>>>>>> 0bd98573f8fe6601a329a63721bbffe7e1f5cc49
-}
+if (isViewingOwnProfile()) renderCredits();
 
 await loadBaseProfile();
 initProfileEditing();
 
 setActiveTab("listings");
 await loadListingsOnce();
-
-initSearch({ onInput: handleSearchInput, onSubmit: handleSearchSubmit });
