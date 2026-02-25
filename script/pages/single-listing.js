@@ -3,11 +3,6 @@ import { getToken, getProfile } from "../utils/storage.js";
 import { getListingsById, placeBid } from "../api/listings.js";
 import { initNav, updateNavUI } from "../utils/nav.js";
 import {
-  initSearch,
-  handleSearchInput,
-  handleSearchSubmit,
-} from "../utils/search.js";
-import {
   getHighestBid,
   timeLeft,
   spinnerMarkup,
@@ -16,6 +11,28 @@ import {
 import { refreshProfile } from "../api/profiles.js";
 
 initNav();
+
+function renderSingle() {
+  return `
+  
+  <a
+      href="./index.html"
+      class="inline-flex items-center gap-2 text-sm text-zinc-600 hover:text-zinc-900"
+      >
+    <i class="fas fa-arrow-left"></i> Back to Gallery
+  </a>
+  <section id="listingRoot" class="mt-6"></section>
+  `;
+}
+
+function mountSingle() {
+  const mount = document.getElementById("singleMount");
+  if (!mount) throw new Error("No mount element found for single listing page");
+  mount.innerHTML = renderSingle();
+}
+
+mountSingle();
+
 const listingRoot = document.getElementById("listingRoot");
 
 function getIdFromURL() {
@@ -41,9 +58,8 @@ function singleListingTemplate(listing) {
   const time = timeLeft(listing?.endsAt);
 
   const media = listing?.media ?? [];
-  const images = media.length
-    ? media.map((m) => m.url).filter(Boolean)
-    : [FALLBACK_IMAGE];
+  const urls = media.map((m) => m.url).filter(Boolean);
+  const images = urls.length > 0 ? urls : [FALLBACK_IMAGE];
 
   const endsAt = listing?.endsAt
     ? new Date(listing.endsAt).toLocaleString()
@@ -63,8 +79,8 @@ function singleListingTemplate(listing) {
               alt="${title}"
               class="w-full h-90 sm:h-110 object-cover bg-zinc-100"
               loading="lazy"
-                onerror='this.onerror=null;this.src="${FALLBACK_IMAGE}"'/>
-          />
+                onerror='this.onerror=null;this.src="${FALLBACK_IMAGE}"'
+            />
           
             <button 
             id="imgPrev"
@@ -109,7 +125,7 @@ function singleListingTemplate(listing) {
                 alt="Thumbnail ${index + 1}"
                 class="w-full h-20 object-cover bg-zinc-200"
                 loading="lazy"
-                onerror='this.onerror=null;this.src="${FALLBACK_IMAGE}"'/>
+                onerror='this.onerror=null;this.src="${FALLBACK_IMAGE}"'
               />
               </button>
             `,
@@ -468,4 +484,3 @@ async function loadSingleListing() {
 }
 
 loadSingleListing();
-initSearch({ onInput: handleSearchInput, onSubmit: handleSearchSubmit });

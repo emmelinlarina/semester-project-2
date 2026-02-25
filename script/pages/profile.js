@@ -18,6 +18,320 @@ import {
 
 requireAuth();
 initNav();
+
+function renderProfile() {
+  return `
+  <section
+        class="rounded-3xl border border-zinc-200 bg-white overflow-hidden"
+      >
+        <div class="relative h-36 sm:h-44 bg-zinc-100">
+          <img
+            id="profileBanner"
+            class="absolute inset-0 h-full w-full object-cover"
+            alt="Profile banner"
+            loading="lazy"
+          />
+          <div class="absolute -bottom-10 left-6">
+            <div
+              class="h-24 w-24 rounded-full bg-white p-2 shadow-sm border border-zinc-200"
+            >
+              <img
+                id="profileAvatar"
+                class="h-full w-full rounded-full object-cover"
+                alt="Profile avatar"
+                loading="lazy"
+              />
+            </div>
+          </div>
+
+          <div class="absolute right-6 top-4 hidden" id="editProfileWrap">
+            <button
+              id="editProfileBtn"
+              class="inline-flex items-center gap-2 rounded-full px-2 py-2 bg-white/70 text-sm font-semibold shadow-sm border border-zinc-200 hover:bg-white"
+              type="button"
+            >
+              <i class="fas fa-pen text-xs"></i>
+              Edit Profile
+            </button>
+          </div>
+        </div>
+
+        <div class="pt-14 pb-6 px-6">
+          <h1 id="profileTitle" class="text-xl sm:text-2xl font-semibold">
+            User
+          </h1>
+          <p
+            id="profileBio"
+            class="mt-2 text-sm text-zinc-600 whitespace-pre-wrap"
+          >
+            No bio yet.
+          </p>
+
+          <div class="mt-4 flex flex-wrap items-center gap-2">
+            <button
+              id="refreshCredits"
+              class="border border-zinc-200 p-2 rounded-full bg-zinc-100 hover:bg-zinc-300 transition text-sm font-semibold"
+            >
+              Refresh
+            </button>
+            <span
+              class="inline-flex items-center rounded-full bg-white/90 border border-zinc-200 px-4 py-2 text-sm font-semibold"
+            >
+              <span id="creditsValue">0</span> $
+            </span>
+
+            <p id="creditsMsg" class="text-sm"></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="mt-8 grid gap-6 lg:grid-cols-[220px_1fr]">
+        <aside class="rounded-3xl border border-zinc-200 bg-white p-4 h-fit">
+          <p class="text-xs font-semibold tracking-widest text-zinc-500">
+            Dashboard
+          </p>
+
+          <div class="mt-3 grid gap-2">
+            <button
+              id="tabListingsBtn"
+              data-tab="listings"
+              class="tabBtn w-full text-left rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-semibold hover:bg-zinc-100"
+              type="button"
+            >
+              My Listings
+            </button>
+
+            <button
+              id="tabBidsBtn"
+              data-tab="bids"
+              class="tabBtn w-full text-left rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-semibold hover:bg-zinc-100"
+              type="button"
+            >
+              My Bids
+            </button>
+          </div>
+        </aside>
+
+        <div class="min-h-60">
+          <div id="tabListings" class="tabPanel">
+            <h2 id="listingsHeader" class="text-lg font-semibold">Listings</h2>
+            <p id="listingsSubheading" class="mt-1 text-sm text-zinc-500">
+              Listings you created
+            </p>
+
+            <div id="activeListingsHeader" class="mt-4"></div>
+            <div
+              id="activeListingsGrid"
+              class="mt-3 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+            ></div>
+
+            <div id="expiredListingsHeader" class="mt-10"></div>
+            <div
+              id="expiredListingsGrid"
+              class="mt-3 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+            ></div>
+          </div>
+
+          <div id="tabBids" class="tabPanel hidden">
+            <h2 class="text-lg font-semibold">Bids</h2>
+            <p class="mt-1 text-sm text-zinc-500">Bids you placed</p>
+            <div
+              id="myBidsGrid"
+              class="mt-4 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+            ></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- edit profile section -->
+      <div
+        id="editProfile"
+        class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 backdrop-blur-sm px-4"
+        aria-hidden="true"
+      >
+        <div
+          class="w-full max-w-xl rounded-3xl bg-white p-6 shadow-xl border border-zinc-200"
+        >
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <h2 class="text-lg font-semibold">Edit Profile</h2>
+              <p class="mt-1 text-sm text-zinc-500">
+                Update bio, avatar, and banner
+              </p>
+            </div>
+
+            <button
+              id="editProfileClose"
+              class="h-10 w-10 rounded-full bg-zinc-200 hover:bg-zinc-300 transition inline-flex items-center justify-center"
+              type="button"
+              aria-label="Close"
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
+          <form id="editProfileForm" class="mt-6 grid gap-4">
+            <label class="grid gap-1 text-sm">
+              <span class="font-semibold"> Bio </span>
+              <textarea
+                id="editBio"
+                rows="4"
+                class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 outline-none focus:ring-zinc-300"
+                placeholder="Write something about yourself"
+              ></textarea>
+            </label>
+
+            <label class="grid gap-1 text-sm">
+              <span class="font-semibold text-zinc-700">Avatar</span>
+              <input
+                id="editAvatar"
+                type="file"
+                accept="image/*"
+                class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 outline-none focus:ring-zinc-300"
+              />
+            </label>
+
+            <label class="grid gap-1 text-sm">
+              <span class="font-semibold text-zinc-700">Banner</span>
+              <input
+                id="editBanner"
+                type="file"
+                accept="image/*"
+                class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 outline-none focus:ring-zinc-300"
+              />
+            </label>
+
+            <p id="editProfileMsg" class="text-sm"></p>
+
+            <div class="mt-2 flex items-center justify-end gap-2">
+              <button
+                id="editCancel"
+                type="button"
+                class="rounded-full bg-zinc-100 px-5 py-3 text-sm font-semibold hover:bg-zinc-300 transition"
+              >
+                Cancel
+              </button>
+
+              <button
+                id="editSave"
+                type="submit"
+                class="rounded-full bg-zinc-900 text-white px-5 py-3 text-sm font-semibold hover:bg-zinc-700 transition"
+              >
+                Save
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div
+        id="editListingModal"
+        class="fixed inset-0 hidden z-50 items-center justify-center bg-black/40 backdrop-blur-sm px-4"
+        aria-hidden="true"
+      >
+        <div
+          class="w-full max-w-xl rounded-3xl bg-white p-6 shadow-xl border border-zinc-200"
+        >
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <h2 class="text-lg font-semibold">Edit Listing</h2>
+              <p class="mt-1 text-sm text-zinc-500">
+                Update listing details and media
+              </p>
+            </div>
+
+            <button
+              id="editListingClose"
+              class="h-10 w-10 rounded-full bg-zinc-200 hover:bg-zinc-300 transition inline-flex items-center justify-center"
+              type="button"
+              aria-label="Close"
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
+          <form id="editListingForm" class="mt-6 grid gap-4">
+            <label class="grid gap-1 text-sm">
+              <span class="font-semibold"> Listing Title </span>
+              <input
+                id="editListingTitle"
+                type="text"
+                maxlength="80"
+                class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 outline-none focus:ring-zinc-300"
+                required
+                placeholder="Enter listing title"
+              />
+            </label>
+
+            <label class="grid gap-1 text-sm">
+              <span class="font-semibold"> Listing Description </span>
+              <textarea
+                id="editListingDescription"
+                rows="4"
+                required
+                class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 outline-none focus:ring-zinc-300"
+                placeholder="Enter listing description"
+              ></textarea>
+            </label>
+
+            <label class="grid gap-1 text-sm">
+              <span class="font-semibold"> End date </span>
+              <input
+                id="editListingEndsAt"
+                type="datetime-local"
+                class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 outline-none focus:ring-zinc-300"
+                placeholder="Enter listing end date"
+              />
+            </label>
+
+            <label class="grid gap-1 text-sm">
+              <span class="font-semibold"> Replace images (optional) </span>
+              <input
+                id="editListingMedia"
+                type="file"
+                accept="image/*"
+                class="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 outline-none focus:ring-zinc-300"
+                multiple
+              />
+            </label>
+
+            <div
+              id="editListingPreview"
+              class="grid grid-cols-2 sm:grid-cols-4 gap-3"
+            ></div>
+
+            <p id="editListingMsg" class="text-sm"></p>
+
+            <div class="mt-2 flex items-center justify-end gap-2">
+              <button
+                id="editListingCancel"
+                type="button"
+                class="rounded-full bg-zinc-100 px-5 py-3 text-sm font-semibold hover:bg-zinc-300 transition"
+              >
+                Cancel
+              </button>
+
+              <button
+                id="editListingSave"
+                type="submit"
+                class="rounded-full bg-zinc-900 text-white px-5 py-3 text-sm font-semibold hover:bg-zinc-700 transition"
+              >
+                Save
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+  `;
+}
+
+function mountProfile() {
+  const mount = document.getElementById("profileMount");
+  if (!mount) throw new Error("Profile mount not found");
+  mount.innerHTML = renderProfile();
+}
+
+mountProfile();
+
 const params = new URLSearchParams(window.location.search);
 const viewedName = params.get("name");
 
