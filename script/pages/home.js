@@ -16,36 +16,38 @@ function renderHome() {
         <h1 class="text-3xl sm:text-4xl md:text-5xl tracking-wide">BRAND</h1>
       </section>
 
-      <!-- highlighted auctions -->
-      <section class="mt-10 font-rasa">
+      <section class="mt-10 font-rasa" aria-labelledby="highlightedTitle">
         <div class="flex items-center justify-between">
-          <h2 class="text-xl font-semibold tracking-widest text-zinc-700">
+          <h2 id="highlightedTitle" class="text-xl font-semibold tracking-widest text-zinc-700">
             HIGHLIGHTED AUCTIONS
           </h2>
         </div>
         <div
           class="mt-4 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 min-h-95"
           id="highlightedGrid"
+          aria-label="Highlighted auctions"
         ></div>
       </section>
 
-      <!-- gallery -->
-      <section class="mt-12 font-rasa">
+      <section class="mt-12 font-rasa" aria-labelledby="galleryTitle">
         <div class="flex items-center justify-between">
-          <h2 class="text-xl font-semibold tracking-widest text-zinc-700">
+          <h2 id="galleryTitle" class="text-xl font-semibold tracking-widest text-zinc-700">
             GALLERY
           </h2>
           <p
             id="searchStatus"
             class="h-5 text-sm text-zinc-500 flex items-center justify-end"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
           ></p>
         </div>
 
         <div class="flex items-center gap-2">
-          <span class="text-xs text-zinc-500">SORT BY</span>
+          <label for="sortSelect" class="text-xs text-zinc-500">SORT BY</label>
           <select
             id="sortSelect"
-            class="rounded-full bg-zinc-100 border border-zinc-200 px-3 py-2 text-sm"
+            class="rounded-full bg-zinc-100 border border-zinc-200 px-3 py-2 mb-2 mt-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:ring-offset-2 focus:ring-offset-white"
           >
             <option value="endsSoon">Ending soon</option>
             <option value="endsLate">Ending late</option>
@@ -54,24 +56,28 @@ function renderHome() {
           </select>
         </div>
 
-        <!-- gallery search -->
-        <form id="gallerySearchForm" class="flex items-center gap-2">
+        <form id="gallerySearchForm" class="flex items-center gap-2" role="search" aria-label="Search gallery">
+        <label for="gallerySearchInput" class="sr-only">Search listings</label>
           <input
             type="search"
             id="gallerySearchInput"
             placeholder="Search gallery"
             class="w-full sm:w-56 rounded-full border border-zinc-200 bg-zinc-100 px-5 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-300"
-          />
+            autocomplete="off"
+            />
+
           <button
             type="submit"
-            class="rounded-full bg-zinc-200 px-4 py-2 text-sm font-semibold hover:bg-zinc-300 transition"
+            class="rounded-full bg-zinc-200 px-4 py-2 text-sm font-semibold hover:bg-zinc-300 transition focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:ring-offset-2 focus:ring-offset-white"
           >
             Search
           </button>
+
           <button
             id="galleryClearBtn"
             type="button"
-            class="rounded-full bg-zinc-100 px-4 py-2 text-sm hover:bg-zinc-200 transition"
+            class="rounded-full bg-zinc-100 px-4 py-2 text-sm hover:bg-zinc-200 transition
+            focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:ring-offset-2 focus:ring-offset-white"
           >
             Clear
           </button>
@@ -80,23 +86,29 @@ function renderHome() {
         <div
           class="mt-4 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
           id="galleryGrid"
+          aria-label="Gallery"
         ></div>
-        <!-- Pagination -->
-        <div class="mt-6 flex items-center justify-center gap-4">
+        
+        <nav class="mt-6 flex items-center justify-center gap-4" aria-label="Pagination">
           <button
             id="prevBtn"
-            class="rounded-full bg-zinc-200 px-6 py-2 text-sm font-semibold hover:bg-zinc-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            class="rounded-full bg-zinc-200 px-6 py-2 text-sm font-semibold hover:bg-zinc-300 transition disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:ring-offset-2 focus:ring-offset-white"
+            aria-label="Previous page"
+            type="button"
           >
             Previous
           </button>
-          <span id="pageNumber" class="text-sm font-semibold">1</span>
+
+          <span id="pageNumber" class="text-sm font-semibold" aria-live="polite" aria-atomic="true">1</span>
           <button
             id="nextBtn"
-            class="rounded-full bg-zinc-200 px-6 py-2 text-sm font-semibold hover:bg-zinc-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            class="rounded-full bg-zinc-200 px-6 py-2 text-sm font-semibold hover:bg-zinc-300 transition disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:ring-offset-2 focus:ring-offset-white"
+            aria-label="Next page"
+            type="button"
           >
             Next
           </button>
-        </div>
+        </nav>
       </section>
     `;
 }
@@ -143,18 +155,18 @@ function pickHighlighted(items) {
 }
 
 function updatePagerUI(count = listings.length) {
-  if (pageNumber) pageNumber.textContent = String(currentPage);
+  if (pageNumber) pageNumber.textContent = `Page ${currentPage}`;
 
   if (isGallerySearching) {
-    if (prevBtn) prevBtn.disabled = true;
-    if (nextBtn) nextBtn.disabled = true;
+    prevBtn && (prevBtn.disabled = true);
+    nextBtn && (nextBtn.disabled = true);
     return;
   }
 
-  if (prevBtn) prevBtn.disabled = currentPage === 1;
+  prevBtn && (prevBtn.disabled = currentPage === 1);
 
   const noMorePages = count < LIMIT;
-  if (nextBtn) nextBtn.disabled = noMorePages;
+  nextBtn && (nextBtn.disabled = noMorePages);
 }
 
 function filterLocalListings(q) {
@@ -168,8 +180,14 @@ function filterLocalListings(q) {
   });
 }
 
+function setBusy(el, busy) {
+  if (!el) return;
+  el.setAttribute("aria-busy", busy ? "true" : "false");
+}
+
 async function loadHighlighted() {
   if (!highlightedLoaded && highlightedGrid) {
+    setBusy(highlightedGrid, true);
     highlightedGrid.innerHTML = skeletonCard(3);
   }
 
@@ -185,12 +203,16 @@ async function loadHighlighted() {
   highlightedListings = pickHighlighted(items);
 
   renderGrid(highlightedGrid, highlightedListings);
+  setBusy(highlightedGrid, false);
   highlightedLoaded = true;
 }
 
 async function loadListings() {
   try {
-    if (galleryGrid) galleryGrid.innerHTML = skeletonCard(LIMIT);
+    if (galleryGrid) {
+      setBusy(galleryGrid, true);
+      galleryGrid.innerHTML = skeletonCard(LIMIT);
+    }
 
     const res = await getListings({
       limit: galleryQuery ? 100 : LIMIT,
@@ -208,25 +230,32 @@ async function loadListings() {
     }
 
     if (!displayItems.length) {
-      if (galleryGrid)
-        galleryGrid.innerHTML = `<p class="text-sm text-zinc-600">No listings found.</p>`;
+      if (galleryGrid) {
+        galleryGrid.innerHTML = `<p class="text-sm text-zinc-600" role="status">No listings found.</p>`;
+        setBusy(galleryGrid, false);
+      }
       updatePagerUI(0);
       return;
     }
 
     if (searchStatus) {
-      searchStatus.textContent = galleryQuery
-        ? `Search results for "${galleryQuery}"`
-        : "Showing all listings";
+      if (galleryQuery) {
+        searchStatus.textContent = `Showing results for "${galleryQuery}"`;
+      } else {
+        searchStatus.textContent = `Showing all active listings (Page ${currentPage})`;
+      }
     }
 
     renderGrid(galleryGrid, displayItems);
+    setBusy(galleryGrid, false);
 
     updatePagerUI();
   } catch (err) {
     console.error("Error loading listings:", err);
-    if (galleryGrid)
-      galleryGrid.innerHTML = `<p class="text-sm text-red-600">Error loading listings.</p>`;
+    if (galleryGrid) {
+      galleryGrid.innerHTML = `<p class="text-sm text-red-600" role="alert">Error loading listings.</p>`;
+      setBusy(galleryGrid, false);
+    }
   }
 }
 
