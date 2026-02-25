@@ -1,5 +1,7 @@
 import { register } from "../api/auth.js";
+import { initNav } from "../utils/nav.js";
 
+initNav({ enableSearch: false });
 const form = document.querySelector("#registerForm");
 const box = document.querySelector("#registerMessage");
 

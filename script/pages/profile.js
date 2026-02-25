@@ -1,5 +1,5 @@
 import { requireAuth } from "../utils/guard.js";
-import { initNav } from "../utils/nav.js";
+import { initNav, updateNavUI } from "../utils/nav.js";
 import { getProfile } from "../utils/storage.js";
 import {
   refreshProfile,
@@ -22,6 +22,7 @@ import {
 } from "../utils/search.js";
 
 requireAuth();
+initNav();
 const params = new URLSearchParams(window.location.search);
 const viewedName = params.get("name");
 
@@ -751,8 +752,8 @@ function initProfileEditing() {
       });
 
       await refreshProfile();
+      updateNavUI();
       await loadBaseProfile();
-      initNav();
       if (isViewingOwnProfile()) {
         renderCredits();
       }
@@ -778,10 +779,10 @@ btn?.addEventListener("click", async () => {
 
   try {
     await refreshProfile();
+    updateNavUI();
     if (isViewingOwnProfile()) {
       renderCredits();
     }
-    initNav();
     msg.textContent = `Credits updated!`;
     msg.className = "text-green-600";
   } catch (error) {
@@ -795,10 +796,11 @@ tabBtns.forEach((b) => {
 });
 
 await refreshProfile();
+updateNavUI();
 if (isViewingOwnProfile()) {
   renderCredits();
 }
-initNav();
+
 await loadBaseProfile();
 
 initProfileEditing();

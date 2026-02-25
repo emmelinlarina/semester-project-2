@@ -1,7 +1,7 @@
 import { getListings } from "../api/listings.js";
 import { ensureAPIKey } from "../api/auth.js";
-import { initSearch } from "../utils/search.js";
 import { initNav } from "../utils/nav.js";
+import { initSearch } from "../utils/search.js";
 import {
   getHighestBid,
   renderGrid,
@@ -9,6 +9,7 @@ import {
   cardTemplate,
 } from "../render/listing-card.js";
 
+initNav();
 const highlightedGrid = document.getElementById("highlightedGrid");
 const galleryGrid = document.getElementById("galleryGrid");
 const sortSelect = document.getElementById("sortSelect");
@@ -231,6 +232,7 @@ galleryClearBtn?.addEventListener("click", async () => {
   await loadListings();
 });
 
+await loadSearchPool();
 initSearch({
   onInput: (q) => {
     navQuery = (q || "").trim();
@@ -244,7 +246,5 @@ initSearch({
   },
 });
 
-initNav();
-await loadSearchPool();
 loadHighlighted();
 loadListings();

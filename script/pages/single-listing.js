@@ -1,7 +1,7 @@
 import { ensureAPIKey } from "../api/auth.js";
 import { getToken, getProfile } from "../utils/storage.js";
 import { getListingsById, placeBid } from "../api/listings.js";
-import { initNav } from "../utils/nav.js";
+import { initNav, updateNavUI } from "../utils/nav.js";
 import {
   initSearch,
   handleSearchInput,
@@ -15,6 +15,7 @@ import {
 } from "../render/listing-card.js";
 import { refreshProfile } from "../api/profiles.js";
 
+initNav();
 const listingRoot = document.getElementById("listingRoot");
 
 function getIdFromURL() {
@@ -378,13 +379,11 @@ function initBidSubmit(listingId, listing) {
     try {
       await ensureAPIKey();
       await placeBid(listingId, amount);
+      await refreshProfile();
+      updateNavUI();
 
       msg.textContent = "Bid placed successfully!";
       msg.classList.add("text-green-600");
-
-      const updated = await refreshProfile();
-      console.log("updated profile:", updated);
-      initNav();
 
       input.value = "";
 
@@ -468,6 +467,5 @@ async function loadSingleListing() {
   }
 }
 
-initNav();
 loadSingleListing();
 initSearch({ onInput: handleSearchInput, onSubmit: handleSearchSubmit });

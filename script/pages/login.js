@@ -1,6 +1,9 @@
 import { login, ensureAPIKey } from "../api/auth.js";
 import { setToken, setProfile } from "../utils/storage.js";
+import { initNav, updateNavUI } from "../utils/nav.js";
 import { refreshProfile } from "../api/profiles.js";
+
+initNav({ enableSearch: false });
 
 const form = document.querySelector("#loginForm");
 const box = document.querySelector("#loginMessage");
@@ -46,6 +49,8 @@ form.addEventListener("submit", async (e) => {
 
     const fresh = await refreshProfile();
     setProfile(fresh || user);
+
+    updateNavUI();
 
     redirecting = true;
     showSuccess("Login successful! Redirecting…");
