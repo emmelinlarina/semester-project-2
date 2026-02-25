@@ -260,14 +260,24 @@ mediaPreview?.addEventListener("click", (e) => {
   }
 });
 
+function fileKey(f) {
+  return `${f.name}-${f.size}-${f.lastModified}`;
+}
+
+function mergeUniqueFiles(existing, incoming, limit = 4) {
+  const map = new Map(existing.map((f) => [fileKey(f), f]));
+  incoming.forEach((f) => map.set(fileKey(f), f));
+  return Array.from(map.values()).slice(0, limit);
+}
+
 mediaInput?.addEventListener("change", (e) => {
   const picked = Array.from(mediaInput.files || []);
 
-  selectedFiles = picked.slice(0, 4);
+  selectedFiles = mergeUniqueFiles(selectedFiles, picked, 4);
   selectedUrl = "";
-  if (mediaUrlInput) mediaUrlInput.value = "";
 
-  if (picked.length > 4 && mediaInput) mediaInput.value = "";
+  if (mediaUrlInput) mediaUrlInput.value = "";
+  mediaInput.value = "";
 
   renderPreviews();
 });
@@ -320,13 +330,14 @@ form?.addEventListener("submit", async (e) => {
 
     setMsg("Creating listing...", "info");
 
-    const result = await createListing({
+    const payload = {
       title,
       description,
       endsAt: toIsoFromDatetimeLocal(endsAt),
-      media: urls.map((url) => ({ url })),
-    });
+      ...(urls.length ? { media: urls.map((url) => ({ url })) } : {}),
+    };
 
+    const result = await createListing(payload);
     const created = result?.data ?? result;
     const id = created?.id;
 
