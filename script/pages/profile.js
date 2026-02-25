@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 import { requireAuth } from "../utils/guard.js";
 import { initNav, updateNavUI } from "../utils/nav.js";
+=======
+import { isAuthed } from "../utils/guard.js";
+import { initNav } from "../utils/nav.js";
+>>>>>>> 0bd98573f8fe6601a329a63721bbffe7e1f5cc49
 import { getProfile } from "../utils/storage.js";
 import {
   refreshProfile,
@@ -11,6 +16,7 @@ import {
 import { uploadImage } from "../utils/cloudinary.js";
 import { skeletonCard } from "../render/listing-card.js";
 import {
+  getListings,
   getListingsById,
   updateListing,
   deleteListing,
@@ -21,8 +27,12 @@ import {
   handleSearchSubmit,
 } from "../utils/search.js";
 
+<<<<<<< HEAD
 requireAuth();
 initNav();
+=======
+const isAuthedUser = isAuthed();
+>>>>>>> 0bd98573f8fe6601a329a63721bbffe7e1f5cc49
 const params = new URLSearchParams(window.location.search);
 const viewedName = params.get("name");
 
@@ -228,8 +238,10 @@ async function onListingsGridClick(e) {
   }
 }
 
-activeListingsGrid?.addEventListener("click", onListingsGridClick);
-expiredListingsGrid?.addEventListener("click", onListingsGridClick);
+if (isAuthedUser && isViewingOwnProfile()) {
+  activeListingsGrid?.addEventListener("click", onListingsGridClick);
+  expiredListingsGrid?.addEventListener("click", onListingsGridClick);
+}
 
 editListingForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -284,10 +296,12 @@ editListingForm?.addEventListener("submit", async (e) => {
 });
 
 function getCurrentName() {
+  if (viewedName) return viewedName;
+
   const me = getProfile()?.name;
-  const name = viewedName || me;
-  if (!name) throw new Error("User profile not found");
-  return name;
+  if (me) return me;
+
+  return null;
 }
 
 function isViewingOwnProfile() {
@@ -335,6 +349,42 @@ function emptyState(title, text) {
       <p class="mt-2 text-gray-600">${text}</p>
     </div>
   `;
+}
+
+function isAuthMissingError(error) {
+  const msg = String(error?.message || "").toLowerCase();
+  return (
+    msg.includes("no authorization header") ||
+    msg.includes("must be logged in") ||
+    msg.includes("unauthorized")
+  );
+}
+
+async function getPublicListingsBySeller(name, { maxPages = 5 } = {}) {
+  const sellerName = String(name || "").trim();
+  if (!sellerName) return [];
+
+  const pageSize = 100;
+  const matched = [];
+
+  for (let page = 1; page <= maxPages; page++) {
+    const res = await getListings({
+      limit: pageSize,
+      page,
+      sort: "created",
+      sortOrder: "desc",
+      active: false,
+    });
+
+    const items = res?.data ?? res ?? [];
+    if (!Array.isArray(items) || items.length === 0) break;
+
+    matched.push(...items.filter((item) => item?.seller?.name === sellerName));
+
+    if (items.length < pageSize) break;
+  }
+
+  return matched;
 }
 
 function listingCard(listing, { showActions = true } = {}) {
@@ -425,12 +475,44 @@ function setActiveTab(tab) {
 }
 
 async function loadBaseProfile() {
-  const name = getCurrentName();
-  const res = await getProfileByName(name);
-  const profile = res?.data ?? res;
+  let profile;
+
+  if (!isAuthedUser && viewedName) {
+    profile = {
+      name: viewedName,
+      bio: "",
+      avatar: null,
+      banner: null,
+    };
+  }
+
+  if (!profile) {
+    try {
+      const name = getCurrentName();
+      const res = await getProfileByName(name);
+      profile = res?.data ?? res;
+    } catch (error) {
+      if (!isAuthedUser && viewedName && isAuthMissingError(error)) {
+        profile = {
+          name: viewedName,
+          bio: "",
+          avatar: null,
+          banner: null,
+        };
+      } else {
+        titleEl.textContent = "Profile not found";
+        bioEl.textContent = "";
+        return;
+      }
+    }
+  }
 
   titleEl.textContent = profile?.name ?? "Unknown User";
-  bioEl.textContent = profile?.bio?.trim() ? profile.bio : "No bio yet.";
+  bioEl.textContent = profile?.bio?.trim()
+    ? profile.bio
+    : !isAuthedUser && viewedName
+      ? "Public profile view. Log in to see full profile details."
+      : "No bio yet.";
 
   const own = isViewingOwnProfile();
   const displayName = profile?.name ?? "User";
@@ -472,8 +554,22 @@ async function loadListingsOnce(force = false) {
     if (activeListingsGrid) showSkeletons(activeListingsGrid, 6);
 
     const name = getCurrentName();
-    const res = await getProfileListings(name, { limit: 50, page: 1 });
-    const listings = res?.data ?? res ?? [];
+    let listings;
+
+    if (!isAuthedUser && viewedName) {
+      listings = await getPublicListingsBySeller(name);
+    } else {
+      try {
+        const res = await getProfileListings(name, { limit: 50, page: 1 });
+        listings = res?.data ?? res ?? [];
+      } catch (error) {
+        if (!isAuthedUser && viewedName && isAuthMissingError(error)) {
+          listings = await getPublicListingsBySeller(name);
+        } else {
+          throw error;
+        }
+      }
+    }
 
     if (!Array.isArray(listings) || listings.length === 0) {
       if (activeListingsGrid) {
@@ -648,7 +744,7 @@ async function loadBidsOnce() {
 async function handleTabClick(tab) {
   const own = isViewingOwnProfile();
 
-  if (tab === "bids" && !own) {
+  if (tab === "bids" && (!isAuthedUser || !own)) {
     setActiveTab("listings");
     return;
   }
@@ -656,8 +752,8 @@ async function handleTabClick(tab) {
   setActiveTab(tab);
 
   try {
-    if (tab === "listings") await loadListingsOnce();
-    if (tab === "bids") await loadBidsOnce();
+    if (tab === "listings") return loadListingsOnce();
+    if (tab === "bids") return loadBidsOnce();
   } catch (error) {
     const box = tab === "listings" ? activeListingsGrid : myBidsGrid;
     if (box) {
@@ -795,14 +891,19 @@ tabBtns.forEach((b) => {
   b.addEventListener("click", () => handleTabClick(b.dataset.tab));
 });
 
+<<<<<<< HEAD
 await refreshProfile();
 updateNavUI();
 if (isViewingOwnProfile()) {
   renderCredits();
+=======
+if (isAuthed()) {
+  await refreshProfile();
+  if (isViewingOwnProfile()) renderCredits();
+>>>>>>> 0bd98573f8fe6601a329a63721bbffe7e1f5cc49
 }
 
 await loadBaseProfile();
-
 initProfileEditing();
 
 setActiveTab("listings");

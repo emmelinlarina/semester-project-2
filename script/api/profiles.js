@@ -28,6 +28,17 @@ function authJsonHeaders() {
   };
 }
 
+function maybeAuthHeaders() {
+  const token = getToken();
+  const apiKey = getApiKey();
+
+  if (!token) return apiKey ? { "X-Noroff-API-Key": apiKey } : {};
+  return {
+    ...(apiKey ? { "X-Noroff-API-Key": apiKey } : {}),
+    Authorization: `Bearer ${token}`,
+  };
+}
+
 export function getProfileByName(
   name,
   { listings = false, wins = false } = {},
@@ -39,7 +50,7 @@ export function getProfileByName(
 
   const qs = params.toString() ? `?${params.toString()}` : "";
   return apiFetch(`auction/profiles/${name}${qs}`, {
-    headers: authHeaders(),
+    headers: maybeAuthHeaders(),
   });
 }
 
@@ -71,7 +82,7 @@ export function getProfileListings(name, params = {}) {
   if (params.active) search.set("_active", "true");
 
   return apiFetch(`auction/profiles/${name}/listings?${search.toString()}`, {
-    headers: authHeaders(),
+    headers: maybeAuthHeaders(),
   });
 }
 
