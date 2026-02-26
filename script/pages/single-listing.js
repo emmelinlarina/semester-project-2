@@ -71,15 +71,19 @@ function singleListingTemplate(listing) {
   return `
     
   <article class="mt-6 grid gap-6 lg:grid-cols-2">
-      <div class="rounded-3xl overflow-hidden border border-zinc-200 bg-zinc-100">
-          <div class="relative">
+      <div class="rounded-3xl overflow-hidden border border-zinc-200 bg-zinc-100 ">
+          <div 
+          id="galleryRegion"
+          tabindex="0"
+          aria-label="Image gallery"
+          class="relative focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500">
             <img
-            id="listingImage"
+              id="listingImage"
               src="${images[0]}"
-              alt="${title}"
+              alt="${title} - Image 1 of ${images.length}"
               class="w-full h-90 sm:h-110 object-cover bg-zinc-100"
               loading="lazy"
-                onerror='this.onerror=null;this.src="${FALLBACK_IMAGE}"'
+              onerror='this.onerror=null;this.src="${FALLBACK_IMAGE}"'
             />
           
             <button 
@@ -88,7 +92,7 @@ function singleListingTemplate(listing) {
             class="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/80 hover:bg-white p-2 shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500"
             aria-label="Previous Image"
             >
-              <i class="fas fa-chevron-left"></i>
+              <i class="fas fa-chevron-left" aria-hidden="true"></i>
             </button>
 
             <button
@@ -97,12 +101,15 @@ function singleListingTemplate(listing) {
             class="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/80 hover:bg-white p-2 shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500"
             aria-label="Next Image"
             >
-              <i class="fas fa-chevron-right"></i>
+              <i class="fas fa-chevron-right" aria-hidden="true"></i>
             </button>
 
             <div 
             id="imageCounter"
             class="absolute bottom-3 right-3 bg-black/50 text-white text-xs px-2 py-1 rounded-full"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
             >
               ${1} / ${images.length}
           </div>
@@ -118,11 +125,12 @@ function singleListingTemplate(listing) {
                   index === 0 ? "ring-2 ring-zinc-800" : ""
                 }"
                 data-index="${index}"
-                aria-label="Open image ${index + 1}"
+                aria-label="Open image ${index + 1} of ${images.length}"
+                aria-current="${index === 0 ? "true" : "false"}"
               >
               <img 
                 src="${url}"
-                alt="Thumbnail ${index + 1}"
+                alt="${title} - Thumbnail ${index + 1} of ${images.length}"
                 class="w-full h-20 object-cover bg-zinc-200"
                 loading="lazy"
                 onerror='this.onerror=null;this.src="${FALLBACK_IMAGE}"'
@@ -277,9 +285,11 @@ function initGallery(images) {
   if (!imgEl || !prevBtn || !nextBtn || !counter || !thumbsWrap) return;
 
   let index = 0;
+  const baseAlt = imgEl.alt.split(" - Image")[0];
 
   function render() {
     imgEl.src = images[index];
+    imgEl.alt = `${baseAlt} - Image ${index + 1} of ${images.length}`;
     counter.textContent = `${index + 1} / ${images.length}`;
 
     thumbsWrap.querySelectorAll(".imgThumb").forEach((thumb) => {
@@ -288,6 +298,7 @@ function initGallery(images) {
 
       thumb.classList.toggle("ring-2", active);
       thumb.classList.toggle("ring-zinc-800", active);
+      thumb.setAttribute("aria-current", active ? "true" : "false");
     });
 
     const disabled = images.length <= 1;
@@ -313,22 +324,65 @@ function initGallery(images) {
     render();
   }
 
-  prevBtn.addEventListener("click", prev);
-  nextBtn.addEventListener("click", next);
+  prevBtn.addEventListener("click", () => {
+    prev();
+    document.getElementById("galleryRegion")?.focus();
+  });
+
+  nextBtn.addEventListener("click", () => {
+    next();
+    document.getElementById("galleryRegion")?.focus();
+  });
 
   thumbsWrap.addEventListener("click", (e) => {
     const btn = e.target.closest(".imgThumb");
     if (!btn) return;
+
     const thumbIndex = Number(btn.dataset.index);
     if (Number.isNaN(thumbIndex)) return;
+
     index = thumbIndex;
     render();
+    document.getElementById("galleryRegion")?.focus();
   });
 
-  window.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowLeft") prev();
-    else if (e.key === "ArrowRight") next();
-  });
+  const region = document.getElementById("galleryRegion");
+
+  if (region) {
+    region.addEventListener("keydown", (e) => {
+      const tag = e.target?.tagName?.toLowerCase();
+      const typing =
+        tag === "input" || tag === "textarea" || e.target?.isContentEditable;
+      if (typing) return;
+
+      switch (e.key) {
+        case "ArrowLeft":
+          e.preventDefault();
+          prev();
+          break;
+
+        case "ArrowRight":
+          e.preventDefault();
+          next();
+          break;
+
+        case "Home":
+          e.preventDefault();
+          index = 0;
+          render();
+          break;
+
+        case "End":
+          e.preventDefault();
+          index = images.length - 1;
+          render();
+          break;
+
+        default:
+          break;
+      }
+    });
+  }
 
   render();
 }

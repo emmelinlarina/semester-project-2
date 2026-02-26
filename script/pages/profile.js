@@ -80,7 +80,7 @@ function renderProfile() {
               <span id="creditsValue">0</span> $
             </span>
 
-            <p id="creditsMsg" class="text-sm"></p>
+            <p id="creditsMsg" class="text-sm" role="status" aria-live="polite" aria-atomic="true"></p>
           </div>
         </div>
       </section>
@@ -91,12 +91,16 @@ function renderProfile() {
             Dashboard
           </p>
 
-          <div class="mt-3 grid gap-2">
+          <div class="mt-3 grid gap-2" role="tablist" aria-label="Profile sections">
             <button
               id="tabListingsBtn"
               data-tab="listings"
               class="tabBtn w-full text-left rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-semibold hover:bg-zinc-100"
               type="button"
+              role="tab"
+              aria-selected="true"
+              aria-controls="tabListings"
+              tabindex="0"
             >
               My Listings
             </button>
@@ -106,6 +110,10 @@ function renderProfile() {
               data-tab="bids"
               class="tabBtn w-full text-left rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-semibold hover:bg-zinc-100"
               type="button"
+              role="tab"
+              aria-selected="false"
+              aria-controls="tabBids"
+              tabindex="-1"
             >
               My Bids
             </button>
@@ -113,7 +121,12 @@ function renderProfile() {
         </aside>
 
         <div class="min-h-60">
-          <div id="tabListings" class="tabPanel">
+          <div 
+          id="tabListings" 
+          class="tabPanel"
+          role="tabpanel"
+          aria-labelledby="tabListingsBtn"
+          >
             <h2 id="listingsHeader" class="text-lg font-semibold">Listings</h2>
             <p id="listingsSubheading" class="mt-1 text-sm text-zinc-500">
               Listings you created
@@ -132,7 +145,7 @@ function renderProfile() {
             ></div>
           </div>
 
-          <div id="tabBids" class="tabPanel hidden">
+          <div id="tabBids" class="tabPanel hidden" role="tabpanel" aria-labelledby="tabBidsBtn">
             <h2 class="text-lg font-semibold">Bids</h2>
             <p class="mt-1 text-sm text-zinc-500">Bids you placed</p>
             <div
@@ -148,14 +161,18 @@ function renderProfile() {
         id="editProfile"
         class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 backdrop-blur-sm px-4"
         aria-hidden="true"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="editProfileTitle"
+        aria-describedby="editProfileDesc"
       >
         <div
           class="w-full max-w-xl rounded-3xl bg-white p-6 shadow-xl border border-zinc-200"
         >
           <div class="flex items-start justify-between gap-4">
             <div>
-              <h2 class="text-lg font-semibold">Edit Profile</h2>
-              <p class="mt-1 text-sm text-zinc-500">
+              <h2 id="editProfileTitle" class="text-lg font-semibold">Edit Profile</h2>
+              <p id="editProfileDesc" class="mt-1 text-sm text-zinc-500">
                 Update bio, avatar, and banner
               </p>
             </div>
@@ -201,7 +218,7 @@ function renderProfile() {
               />
             </label>
 
-            <p id="editProfileMsg" class="text-sm"></p>
+            <p id="editProfileMsg" class="text-sm" role="status" aria-live="polite" aria-atomic="true"></p>
 
             <div class="mt-2 flex items-center justify-end gap-2">
               <button
@@ -227,14 +244,18 @@ function renderProfile() {
         id="editListingModal"
         class="fixed inset-0 hidden z-50 items-center justify-center bg-black/40 backdrop-blur-sm px-4"
         aria-hidden="true"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="editListingTitleHeading"
+        aria-describedby="editListingDesc"
       >
         <div
           class="w-full max-w-xl rounded-3xl bg-white p-6 shadow-xl border border-zinc-200"
         >
           <div class="flex items-start justify-between gap-4">
             <div>
-              <h2 class="text-lg font-semibold">Edit Listing</h2>
-              <p class="mt-1 text-sm text-zinc-500">
+              <h2 id="editListingTitleHeading" class="text-lg font-semibold">Edit Listing</h2>
+              <p id="editListingDesc" class="mt-1 text-sm text-zinc-500">
                 Update listing details and media
               </p>
             </div>
@@ -299,7 +320,7 @@ function renderProfile() {
               class="grid grid-cols-2 sm:grid-cols-4 gap-3"
             ></div>
 
-            <p id="editListingMsg" class="text-sm"></p>
+            <p id="editListingMsg" class="text-sm" role="status" aria-live="polite" aria-atomic="true"></p>
 
             <div class="mt-2 flex items-center justify-end gap-2">
               <button
@@ -323,6 +344,9 @@ function renderProfile() {
       </div>
   `;
 }
+
+let lastFocusEl = null;
+let lastEditListingFocusEl = null;
 
 function mountProfile() {
   const mount = document.getElementById("profileMount");
@@ -399,6 +423,9 @@ function setEditListingMsg(text, type = "info") {
 
 function openEditListingModal() {
   if (!editListingId) return;
+
+  lastEditListingFocusEl = document.activeElement;
+
   setEditListingMsg("", "info");
   editListingModal.classList.remove("hidden");
   editListingModal.classList.add("flex");
@@ -425,6 +452,9 @@ function closeEditListingModal() {
 
   if (editListingPreview) editListingPreview.innerHTML = "";
   if (editListingMedia) editListingMedia.value = "";
+
+  lastEditListingFocusEl?.focus?.();
+  lastEditListingFocusEl = null;
 }
 
 function toDatetimeLocal(isoString) {
@@ -725,13 +755,60 @@ function listingCard(listing, { showActions = true } = {}) {
 }
 
 function setActiveTab(tab) {
-  tabListings?.classList.toggle("hidden", tab !== "listings");
-  tabBids?.classList.toggle("hidden", tab !== "bids");
+  const isListings = tab === "listings";
+  const isBids = tab === "bids";
+
+  tabListings?.classList.toggle("hidden", !isListings);
+  tabBids?.classList.toggle("hidden", !isBids);
+
+  tabListings?.setAttribute("aria-hidden", isListings ? "false" : "true");
+  tabBids?.setAttribute("aria-hidden", isBids ? "false" : "true");
 
   tabBtns.forEach((btn) => {
     const active = btn.dataset.tab === tab;
     btn.classList.toggle("bg-zinc-100", active);
     btn.classList.toggle("border-zinc-300", active);
+
+    btn.setAttribute("aria-selected", active ? "true" : "false");
+    btn.setAttribute("tabindex", active ? "0" : "-1");
+  });
+}
+
+function initTabsA11y() {
+  const tabs = Array.from(tabBtns).filter(
+    (t) => !t.classList.contains("hidden"),
+  );
+  if (!tabs.length) return;
+
+  tabs.forEach((tab) => {
+    tab.addEventListener("keydown", (e) => {
+      const keys = [
+        "ArrowLeft",
+        "ArrowRight",
+        "ArrowUp",
+        "ArrowDown",
+        "Home",
+        "End",
+      ];
+      if (!keys.includes(e.key)) return;
+
+      e.preventDefault();
+      const currentIndex = tabs.indexOf(document.activeElement);
+      if (currentIndex === -1) return;
+
+      let newIndex = currentIndex;
+
+      if (e.key === "ArrowRight" || e.key === "ArrowDown")
+        newIndex = (currentIndex + 1) % tabs.length;
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp")
+        newIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+      if (e.key === "Home") newIndex = 0;
+      if (e.key === "End") newIndex = tabs.length - 1;
+
+      const newTab = tabs[newIndex];
+      newTab.focus();
+      handleTabClick(newTab.dataset.tab);
+    });
   });
 }
 
@@ -761,8 +838,17 @@ async function loadBaseProfile() {
         : `${displayName}'s Listings`;
 
     const bidsTabBtn = document.querySelector('.tabBtn[data-tab="bids"]');
-    bidsTabBtn?.classList.toggle("hidden", !own);
+
+    if (bidsTabBtn) {
+      const hidden = !own;
+      bidsTabBtn?.classList.toggle("hidden", hidden);
+      bidsTabBtn?.toggleAttribute("disabled", hidden);
+      bidsTabBtn?.setAttribute("tabindex", hidden ? "-1" : "0");
+      bidsTabBtn?.setAttribute("aria-hidden", hidden ? "true" : "false");
+    }
+
     tabBids?.classList.toggle("hidden", !own);
+    tabBids?.setAttribute("aria-hidden", !own ? "true" : "false");
 
     if (!own) {
       setActiveTab("listings");
@@ -989,8 +1075,9 @@ async function handleTabClick(tab) {
 }
 
 function openEditModal() {
-  const current = getProfile();
+  lastFocusEl = document.activeElement;
 
+  const current = getProfile();
   editBio.value = current?.bio ?? "";
   editAvatar.value = "";
   editBanner.value = "";
@@ -1001,12 +1088,16 @@ function openEditModal() {
   editProfileModal.classList.remove("hidden");
   editProfileModal.classList.add("flex");
   editProfileModal.setAttribute("aria-hidden", "false");
+
+  editBio?.focus();
 }
 
 function closeEditModal() {
   editProfileModal.classList.add("hidden");
   editProfileModal.classList.remove("flex");
   editProfileModal.setAttribute("aria-hidden", "true");
+  lastFocusEl?.focus?.();
+  lastFocusEl = null;
 }
 
 function isValidUrlorEmpty(value) {
@@ -1031,7 +1122,7 @@ function initProfileEditing() {
     return;
   }
 
-  editProfileWrap?.addEventListener("click", openEditModal);
+  editProfileBtn?.addEventListener("click", openEditModal);
   editProfileClose?.addEventListener("click", closeEditModal);
   editCancel?.addEventListener("click", closeEditModal);
 
@@ -1119,6 +1210,8 @@ updateNavUI();
 if (isViewingOwnProfile()) renderCredits();
 
 await loadBaseProfile();
+
+initTabsA11y();
 initProfileEditing();
 
 setActiveTab("listings");
