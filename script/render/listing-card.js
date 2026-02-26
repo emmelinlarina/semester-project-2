@@ -35,26 +35,45 @@ export function cardTemplate(
 
   const sellerName = listing?.seller?.name ?? "Unknown";
 
+  const isFallback = image === FALLBACK_IMAGE;
+  const imgAlt = isFallback ? "" : `Image of ${title}`;
+
+  const timeSr =
+    time === "Ended"
+      ? "Auction ended"
+      : `Time left: ${time.replace("d", "days").replace("h", "hours").replace("m", "minutes")}`;
+
+  const href = `${hrefBase}?id=${listing.id}`;
+
   return ` 
-    <a href="${hrefBase}?id=${listing.id}" class="block rounded-lg transition-shadow duration-300">
+    <a href="${href}" 
+    class="block rounded-lg transition-shadow duration-300"
+    aria-label="View Listing: ${title}. Seller: ${sellerName}. Current bid: ${bid} dollars. ${timeSr}."
+    >
       <img 
       src="${image}" 
-      alt="${title}" 
+      alt="${imgAlt}" 
       class="w-full h-48 object-cover bg-zinc-200" 
       loading="lazy" 
       onerror='this.onerror=null;this.src="${FALLBACK_IMAGE}"'/>
+
       <div class="p-4">
         <h3 class="text-lg font-semibold mb-2">${title}</h3>
-        <span class="text-xs text-gray-500">${time}</span>
+
+        <span class="text-xs text-gray-500" aria-hidden="true">${time}</span>
         <p class="text-sm text-gray-600 mb-4">${description}</p>
+
         <div class="flex items-center justify-between">
           <span class="text-sm font-bold">${bid} $</span>
-          <a href="./user-profile.html?name=${encodeURIComponent(sellerName)}"
-          class="text-xs text-zinc-700 hover:underline underline-offset-2 focus-visible:underline"
+          
+          <span
+          class="text-xs text-zinc-700 hover:underline underline-offset-2 group-hover:underline"
           aria-label='View profile of ${sellerName}'
           >
-          @${sellerName}</a>
+          @${sellerName}
+          </span>
         </div>
+
       </div>
     </a>
   `;
@@ -67,8 +86,16 @@ export function renderGrid(el, items, templateFn = cardTemplate) {
 
 export function spinnerMarkup(label = "Loading...") {
   return `
-    <div class="flex items-center justify-center gap-3 py-10 text-zinc-600">
-      <div class="h-5 w-5 rounded-full border-2 border-t-2 border-zinc-400 border-t-zinc-600 animate-spin"></div>
+    <div 
+    class="flex items-center justify-center gap-3 py-10 text-zinc-600"
+    role="status" 
+    aria-live="polite" 
+    aria-label="${label}"
+    >
+      <div 
+      class="h-5 w-5 rounded-full border-2 border-t-2 border-zinc-400 border-t-zinc-600 animate-spin"
+      aria-hidden="true"
+      ></div>
       <p class="text-sm">${label}</p>
     </div>
   `;
