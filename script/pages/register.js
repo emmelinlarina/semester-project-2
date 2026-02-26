@@ -10,7 +10,7 @@ function renderRegister() {
         aria-label="Go back to home page"
         class="inline-flex items-center gap-2 text-sm text-zinc-700 hover:text-brand-700"
       >
-        <i class="fa-solid fa-arrow-left"></i>
+        <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
       </a>
 
       <header class="mt-6">
@@ -52,11 +52,15 @@ function renderRegister() {
               id="password"
               name="password"
               minlength="8"
-              autocomplete="current-password"
+              autocomplete="new-password"
               required
+              aria-describedby="passwordHelp"
               class="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-brown-500 focus:outline-none focus:ring-1 focus:ring-brown-500"
               placeholder="••••••••"
             />
+            <p id="passwordHelp" class="text-xs text-zinc-500 mt-1">
+              Must be at least 8 characters.
+            </p>
           </div>
 
           <button
@@ -80,6 +84,7 @@ function renderRegister() {
             class="hidden rounded-xl border border-brand-700/30 bg-brand-700/10 text-brand-700 px-4 py-3 text-sm"
             role="status"
             aria-live="polite"
+            aria-atomic="true"
           ></div>
         </form>
       </section>
@@ -93,20 +98,62 @@ function mountRegister() {
   mount.innerHTML = renderRegister();
 }
 
-function showError(message) {
-  box.textContent = message;
-  box.className =
-    "rounded-xl border border-red-700/30 bg-red-700/10 px-4 py-3 text-sm text-red-700";
-  box.classList.remove("hidden");
+function setBusy(isBusy) {
+  const formEl = document.querySelector("#registerForm");
+  const btn = formEl?.querySelector('button[type="submit"]');
+
+  if (btn) {
+    btn.disabled = isBusy;
+    btn.setAttribute("aria-disabled", String(isBusy));
+  }
+  if (formEl) {
+    formEl.setAttribute("aria-busy", String(isBusy));
+  }
 }
 
-function showSuccess(message) {
-  box.textContent = message;
-  box.className =
-    "rounded-xl border border-green-700/30 bg-green-700/10 px-4 py-3 text-sm text-green-700";
-  box.classList.remove("hidden");
+function markInvalid(id, isInvalid) {
+  const element = document.getElementById(id);
+  if (!element) return;
+  if (isInvalid) element.setAttribute("aria-invalid", "true");
+  else element.removeAttribute("aria-invalid");
 }
 
+function focusFirstInvalid(ids) {
+  for (const id of ids) {
+    const element = document.getElementById(id);
+    if (element?.getAttribute("aria-invalid") === "true") {
+      element.focus();
+      return;
+    }
+  }
+}
+
+function showInfo(message, type = "info") {
+  if (!box) return;
+
+  box.textContent = message;
+  box.classList.remove("hidden");
+
+  if (type === "error") {
+    box.setAttribute("tabindex", "-1");
+    box.focus();
+  }
+
+  box.setAttribute("aria-atomic", "true");
+  box.setAttribute("role", type === "error" ? "alert" : "status");
+  box.setAttribute("aria-live", type === "error" ? "assertive" : "polite");
+
+  if (type === "error") {
+    box.className =
+      "rounded-xl border border-red-700/30 bg-red-700/10 px-4 py-3 text-sm text-red-700";
+  } else if (type === "success") {
+    box.className =
+      "rounded-xl border border-green-700/30 bg-green-700/10 px-4 py-3 text-sm text-green-700";
+  } else {
+    box.className =
+      "rounded-xl border border-brand-700/30 bg-brand-700/10 px-4 py-3 text-sm text-brand-700";
+  }
+}
 mountRegister();
 
 const form = document.querySelector("#registerForm");
@@ -121,6 +168,33 @@ form.addEventListener("submit", async (e) => {
   data.name = data.name.trim();
   data.email = data.email.trim().toLowerCase();
 
+  markInvalid("name", false);
+  markInvalid("email", false);
+  markInvalid("password", false);
+
+  data.password = (data.password || "").trim();
+
+  if (!data.name || data.name.length < 3) {
+    markInvalid("name", true);
+    showInfo("Please enter your name (at least 3 characters).", "error");
+    focusFirstInvalid(["name", "email", "password"]);
+    return;
+  }
+
+  if (!data.email) {
+    markInvalid("email", true);
+    showInfo("Please enter a stud@noroff.no email", "error");
+    focusFirstInvalid(["email", "name", "password"]);
+    return;
+  }
+
+  if (!data.password || data.password.length < 8) {
+    markInvalid("password", true);
+    showInfo("Password must be at least 8 characters long.", "error");
+    focusFirstInvalid(["password", "name", "email"]);
+    return;
+  }
+
   const btn = form.querySelector('button[type="submit"]');
   const originalText = btn.textContent;
 
@@ -128,22 +202,22 @@ form.addEventListener("submit", async (e) => {
 
   try {
     btn.textContent = "REGISTERING…";
-    btn.disabled = true;
+    setBusy(true);
 
     await register(data);
 
     redirecting = true;
-    showSuccess("Registration successful! Redirecting to login…");
+    showInfo("Registration successful! Redirecting to login…", "success");
 
     setTimeout(() => {
       window.location.href = "./login.html";
     }, 2000);
   } catch (error) {
-    showError(error.message || "Registration failed.");
+    showInfo(error.message || "Registration failed.", "error");
   } finally {
     if (!redirecting) {
       btn.textContent = originalText;
-      btn.disabled = false;
+      setBusy(false);
     }
   }
 });
