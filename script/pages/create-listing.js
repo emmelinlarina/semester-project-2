@@ -26,7 +26,7 @@ function renderCreateListing() {
             href="./index.html"
             class="inline-flex items-center gap-2 rounded-full bg-zinc-200 px-5 py-2 text-sm font-semibold hover:bg-zinc-300 transition"
           >
-            <i class="fas fa-arrow-left"></i> Back to Home
+            <i class="fas fa-arrow-left" aria-hidden="true"></i> Back to Home
           </a>
         </div>
         <form id="createListingForm" class="mt-6 grid gap-5">
@@ -37,21 +37,29 @@ function renderCreateListing() {
               id="title"
               name="title"
               maxlength="80"
+              aria-describedby="titleHelp"
               class="w-full rounded-lg border border-zinc-200 bg-zinc-100 px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-300"
               required
               placeholder="e.g. Vintage clock"
             />
+            <p id="titleHelp" class="text-xs text-zinc-500">
+              A descriptive title for your listing (max 80 characters).
+            </p>
           </label>
           <label class="grid gap-2 text-sm">
             <span class="font-semibold">Description</span>
             <textarea
               id="description"
               name="description"
+              aria-describedby="descriptionHelp"
               class="w-full rounded-lg border border-zinc-200 bg-zinc-100 px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-300"
               rows="5"
               placeholder="Tell people what they are bidding on"
               required
             ></textarea>
+            <p id="descriptionHelp" class="text-xs text-zinc-500">
+              A detailed description of your listing.
+            </p>
           </label>
 
           <div class="grid gap-5 md:grid-cols-2">
@@ -61,9 +69,13 @@ function renderCreateListing() {
                 type="datetime-local"
                 id="endsAt"
                 name="endsAt"
+                aria-describedby="endsAtHelp"
                 class="w-full rounded-lg border border-zinc-200 bg-zinc-100 px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-300"
                 required
               />
+              <p id="endsAtHelp" class="text-xs text-zinc-500">
+                The date and time when the listing will end. Must be in the future. 
+              </p>
             </label>
 
             <label class="grid gap-2 text-sm">
@@ -86,9 +98,10 @@ function renderCreateListing() {
               id="media"
               accept="image/*"
               multiple
+              aria-describedby="mediaHelp"
               class="block cursor-pointer w-full text-sm rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 file:mr-4 file:rounded-full file:border-0 file:bg-zinc-100 file:px-4 file:py-2 file:text-sm file:font-semibold hover:file:bg-zinc-200 transition focus:ring-2 focus:ring-zinc-300"
             />
-            <div class="text-xs text-zinc-500 flex flex-wrap gap-2">
+            <div id="mediaHelp" class="text-xs text-zinc-500 flex flex-wrap gap-2">
               <span>Up to 4 images recommended</span>
             </div>
           </label>
@@ -96,7 +109,7 @@ function renderCreateListing() {
             id="mediaPreview"
             class="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3"
           ></div>
-          <p id="createMsg" class="text-sm"></p>
+          <p id="createMsg" class="text-sm" role="status" aria-live="polite" aria-atomic="true"></p>
 
           <div
             class="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between"
@@ -106,7 +119,7 @@ function renderCreateListing() {
               type="submit"
               class="w-full sm:w-auto rounded-full bg-zinc-200 px-5 py-3 text-sm font-semibold hover:bg-zinc-300 transition"
             >
-              <i class="fas fa-plus"></i>
+              <i class="fas fa-plus" aria-hidden="true"></i>
               Create Listing
             </button>
           </div>
@@ -135,6 +148,10 @@ function setMsg(text, type = "info") {
   if (!msg) return;
   msg.textContent = text;
   msg.className = "text-sm";
+
+  msg.setAttribute("aria-atomic", "true");
+  msg.setAttribute("role", type === "error" ? "alert" : "status");
+  msg.setAttribute("aria-live", type === "error" ? "assertive" : "polite");
 
   if (type === "error") msg.classList.add("text-red-500");
   if (type === "success") msg.classList.add("text-green-500");
@@ -171,6 +188,8 @@ function renderPreviews() {
 
   const clearBtn = document.createElement("button");
   clearBtn.type = "button";
+  clearBtn.setAttribute("aria-controls", "mediaPreview");
+  clearBtn.setAttribute("aria-label", "Clear selected media");
   clearBtn.className = "text-sm text-red-500 hover:underline";
   clearBtn.textContent = "Clear all";
   clearBtn.addEventListener("click", () => {
@@ -178,7 +197,9 @@ function renderPreviews() {
     selectedUrl = "";
     if (mediaInput) mediaInput.value = "";
     if (mediaUrlInput) mediaUrlInput.value = "";
+
     renderPreviews();
+    (mediaInput || mediaUrlInput)?.focus();
   });
 
   header.appendChild(count);
@@ -208,7 +229,7 @@ function renderPreviews() {
                 aria-label="Remove image"
                 data-remove-file="${i}"
             >
-            <i class="fas fa-xmark"></i>
+            <i class="fas fa-xmark" aria-hidden="true"></i>
             </button>
         `;
     mediaPreview.appendChild(card);
@@ -232,7 +253,7 @@ function renderPreviews() {
                 aria-label="Remove media URL"
                 data-remove-url="true"
             >
-            <i class="fas fa-xmark text-zinc-800"></i>
+            <i class="fas fa-xmark text-zinc-800" aria-hidden="true"></i>
             </button>
         `;
     mediaPreview.appendChild(card);
@@ -270,6 +291,32 @@ function mergeUniqueFiles(existing, incoming, limit = 4) {
   return Array.from(map.values()).slice(0, limit);
 }
 
+function markInvalid(id, isInvalid) {
+  const element = document.getElementById(id);
+  if (!element) return;
+
+  if (isInvalid) element.setAttribute("aria-invalid", "true");
+  else element.removeAttribute("aria-invalid");
+}
+
+function focusFirstInvalid(ids) {
+  for (const id of ids) {
+    const element = document.getElementById(id);
+    if (element && element.getAttribute("aria-invalid") === "true") {
+      element.focus();
+      return;
+    }
+  }
+}
+
+function setBusy(isBusy) {
+  if (submitBtn) {
+    submitBtn.disabled = isBusy;
+    submitBtn.setAttribute("aria-disabled", String(isBusy));
+  }
+  if (form) form.setAttribute("aria-busy", String(isBusy));
+}
+
 mediaInput?.addEventListener("change", (e) => {
   const picked = Array.from(mediaInput.files || []);
 
@@ -295,22 +342,51 @@ form?.addEventListener("submit", async (e) => {
   e.preventDefault();
   setMsg("", "info");
 
+  markInvalid("title", false);
+  markInvalid("description", false);
+  markInvalid("endsAt", false);
+
   const title = document.getElementById("title")?.value?.trim() ?? "";
   const description =
     document.getElementById("description")?.value?.trim() ?? "";
   const endsAt = document.getElementById("endsAt")?.value?.trim() ?? "";
 
-  if (!title) return setMsg("Title is required", "error");
-  if (!description) return setMsg("Description is required", "error");
-  if (!endsAt) return setMsg("End date/time is required", "error");
+  if (!title) {
+    markInvalid("title", true);
+    setMsg("Title is required", "error");
+    focusFirstInvalid(["title", "description", "endsAt"]);
+    return;
+  }
+
+  if (!description) {
+    markInvalid("description", true);
+    setMsg("Description is required", "error");
+    focusFirstInvalid(["description", "title", "endsAt"]);
+    return;
+  }
+
+  if (!endsAt) {
+    markInvalid("endsAt", true);
+    setMsg("End date/time is required", "error");
+    focusFirstInvalid(["endsAt", "title", "description"]);
+    return;
+  }
 
   const endLocal = new Date(endsAt);
-  if (Number.isNaN(endLocal.getTime()))
-    return setMsg("Invalid end date/time", "error");
-  if (endLocal <= new Date())
-    return setMsg("End date/time must be in the future", "error");
+  if (Number.isNaN(endLocal.getTime())) {
+    markInvalid("endsAt", true);
+    setMsg("Invalid end date/time format", "error");
+    focusFirstInvalid(["endsAt", "title", "description"]);
+    return;
+  }
+  if (endLocal <= new Date()) {
+    markInvalid("endsAt", true);
+    setMsg("End date/time must be in the future", "error");
+    focusFirstInvalid(["endsAt", "title", "description"]);
+    return;
+  }
 
-  if (submitBtn) submitBtn.disabled = true;
+  setBusy(true);
 
   try {
     await ensureAPIKey();
@@ -355,7 +431,7 @@ form?.addEventListener("submit", async (e) => {
       err?.response?.data?.error?.message || err.message || "An error occurred";
     setMsg(`Error: ${message}`, "error");
   } finally {
-    if (submitBtn) submitBtn.disabled = false;
+    setBusy(false);
   }
 });
 initSearch({ onInput: handleSearchInput, onSubmit: handleSearchSubmit });
