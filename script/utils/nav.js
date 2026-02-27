@@ -306,6 +306,11 @@ export function initNav({ enableSearch = true } = {}) {
   updateNavUI();
 
   if (enableSearch) {
+    const overlay = document.getElementById("searchOverlay");
+    if (overlay) document.body.appendChild(overlay);
+  }
+
+  if (enableSearch) {
     initSearch({
       onInput: handleSearchInput,
       onSubmit: handleSearchSubmit,

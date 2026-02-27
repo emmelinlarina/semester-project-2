@@ -47,6 +47,7 @@ export function initSearch({
 
     if (onSubmit) {
       onSubmit(q);
+      close();
       return;
     }
 
