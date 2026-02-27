@@ -4,6 +4,8 @@ import {
   getHighestBid,
   renderGrid,
   skeletonCard,
+  timeLeft,
+  FALLBACK_IMAGE,
 } from "../render/listing-card.js";
 
 initNav();
@@ -11,9 +13,17 @@ initNav();
 function renderHome() {
   return `
       <section
-        class="rounded-3xl bg-zinc-100 border border-zinc-200 flex flex-col items-start justify-center px-6 py-4"
-      >
-        <h1 class="text-3xl sm:text-4xl md:text-5xl tracking-wide">BRAND</h1>
+          class="relative overflow-hidden rounded-3xl border border-zinc-200 bg-zinc-100"
+          aria-labelledby="weeklyTitle"
+        >
+          <div id="weeklyHighlight" class="min-h-72 sm:min-h-96 lg:min-h-130">
+
+            <div class="p-6 sm:p-10 animate-pulse">
+              <div class="h-6 w-40 bg-zinc-200 rounded"></div>
+              <div class="mt-4 h-10 w-2/3 bg-zinc-200 rounded"></div>
+              <div class="mt-3 h-5 w-1/2 bg-zinc-200 rounded"></div>
+            </div>
+          </div>
       </section>
 
       <section class="mt-10 font-rasa" aria-labelledby="highlightedTitle">
@@ -153,6 +163,114 @@ function pickHighlighted(items) {
     .slice(0, 3);
 }
 
+function getISOWeekNumber(date = new Date()) {
+  const d = new Date(
+    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()),
+  );
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+}
+
+function pickWeeklyHighlights(items) {
+  const active = (items || []).filter((x) => x?.endsAt && x?.title);
+
+  if (!active.length) return null;
+
+  const sorted = [...active].sort((a, b) => (a.id > b.id ? -1 : 1));
+
+  const week = getISOWeekNumber(new Date());
+  const index = week % sorted.length;
+
+  return sorted[index];
+}
+
+function weeklyHeroTemplate(listing) {
+  if (!listing) {
+    return `
+      <div class="p-6 sm:p-10">
+      <p class="text-xs tracking-widest font-rasa text-zinc-500"
+      >FEATURED THIS WEEK 
+      </p>
+
+        <h1 id="weeklyTitle" 
+        class="mt-2 text-3xl sm:text-4xl font-semibold tracking-tight text-zinc-900">
+          No featured auction this week
+        </h1>
+
+        <p class="mt-2 text-base text-zinc-600 max-w-xl"> 
+        Check back later for new featured auctions.
+        </p>
+      </div>
+    `;
+  }
+
+  const title = listing?.title ?? "Untitled";
+  const bid = getHighestBid(listing);
+  const time = timeLeft(listing?.endsAt);
+  const image =
+    listing?.media?.length > 0 && listing.media[0].url
+      ? listing.media[0].url
+      : FALLBACK_IMAGE;
+
+  const href = `./single-listing.html?id=${listing.id}`;
+
+  return `
+
+  <a href="${href}" 
+  class="group block relative min-h-72 sm:min-h-96 lg:min-h-130 rounded-3xl overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-white/70">
+  
+  <div class="absolute inset-0">
+    <img 
+      src="${image}"
+      alt="Image of ${title}"
+      class="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+      loading="lazy"
+      onerror='this.onerror=null;this.src="${FALLBACK_IMAGE}"'
+    />
+
+    <div class="absolute inset-0 from-black/80 via-black/40 to-transparent"></div>
+    <div class="absolute inset-0 bg-black/10"></div>
+  </div>
+
+  <div class="relative h-full flex items-end ">
+    <div class="p-6 sm:p-10 max-w-2xl rounded-2xl bg-black/20 backdrop-blur-md border border-white/15 shadow-lg">
+
+      <p class="text-lg tracking-[0.3em] text-white/80">
+      FEATURED AUCTION THIS WEEK
+      </p>
+
+      <h1 id="weeklyTitle" 
+      class="mt-2 text-3xl sm:text-4xl lg:text-5xl font-semibold text-white leading-tight">
+        ${title}
+      </h1>
+
+      <div class="mt-3 flex flex-wrap gap-2">
+
+        <span 
+        class="rounded-full bg-white/15 px-4 py-1 text-sm text-white">
+          ${time === "Ended" ? "Ended" : `Ends in ${time}`}
+        </span>
+
+        <span class="rounded-full bg-white/15 px-4 py-1 text-sm text-white backdrop-blur tabular-nums font-bold"> 
+        Highest bid: ${bid} $
+        </span>
+      </div>
+
+      <div class="pt-2">
+      <span 
+      class="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-semibold text-zinc-900 transition group-hover:gap-3">
+        View auction 
+        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+      </span>
+      </div>
+    </div>
+  </div>
+  </a>
+`;
+}
+
 function updatePagerUI(count = listings.length) {
   if (pageNumber) pageNumber.textContent = `Page ${currentPage}`;
 
@@ -191,7 +309,7 @@ async function loadHighlighted() {
   }
 
   const res = await getListings({
-    limit: 6,
+    limit: 30,
     page: 1,
     sort: "endsAt",
     sortOrder: "asc",
@@ -199,6 +317,12 @@ async function loadHighlighted() {
   });
 
   const items = res?.data ?? [];
+  const weeklyHighlight = document.getElementById("weeklyHighlight");
+  if (weeklyHighlight) {
+    const weekly = pickWeeklyHighlights(items);
+    weeklyHighlight.innerHTML = weeklyHeroTemplate(weekly);
+  }
+
   highlightedListings = pickHighlighted(items);
 
   renderGrid(highlightedGrid, highlightedListings);
