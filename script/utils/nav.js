@@ -8,7 +8,7 @@ export function renderNav(mountId = "navMount", { enableSearch = true } = {}) {
   mount.innerHTML = `
   <header class="border-b border-zinc-200 bg-white">
 
-      <nav class="mx-auto max-w-6xl px-4 py-4">
+      <nav class="mx-auto max-w-6xl px-4 py-4" aria-label="Primary navigation">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
             <a
@@ -26,10 +26,10 @@ export function renderNav(mountId = "navMount", { enableSearch = true } = {}) {
               type="button"
               class="inline-flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-full bg-zinc-200 hover:bg-zinc-300 transition"
               aria-label="Search"
-              aria-controls="searchForm"
+              aria-controls="searchOverlay"
               aria-expanded="false"
             >
-              <i class="fas fa-search"></i>
+              <i class="fas fa-search" aria-hidden="true"></i>
             </button>
             `
                 : ""
@@ -42,7 +42,7 @@ export function renderNav(mountId = "navMount", { enableSearch = true } = {}) {
               class="hidden h-10 w-10 items-center justify-center rounded-full bg-zinc-200 hover:bg-zinc-300 transition"
               aria-label="Create listing"
             >
-              <i class="fas fa-plus"></i>
+              <i class="fas fa-plus" aria-hidden="true"></i>
             </a>
           </div>
 
@@ -91,7 +91,7 @@ export function renderNav(mountId = "navMount", { enableSearch = true } = {}) {
               class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-zinc-200 hover:bg-zinc-300 transition"
               aria-label="Log out"
             >
-              <i class="fas fa-right-from-bracket"></i>
+              <i class="fas fa-right-from-bracket" aria-hidden="true"></i>
             </button>
           </div>
 
@@ -109,7 +109,7 @@ export function renderNav(mountId = "navMount", { enableSearch = true } = {}) {
               class="hidden h-8 w-8 items-center justify-center rounded-full bg-zinc-200 hover:bg-zinc-300 transition"
               aria-label="Profile"
             >
-              <i class="fas fa-user"></i>
+              <i class="fas fa-user" aria-hidden="true"></i>
             </a>
 
             <!-- MOBILE: Hamburger -->
@@ -121,7 +121,7 @@ export function renderNav(mountId = "navMount", { enableSearch = true } = {}) {
               aria-controls="mobileMenu"
               aria-expanded="false"
             >
-              <i class="fas fa-bars"></i>
+              <i class="fas fa-bars" aria-hidden="true"></i>
             </button>
           </div>
         </div>
@@ -133,12 +133,19 @@ export function renderNav(mountId = "navMount", { enableSearch = true } = {}) {
         <div
           id="searchOverlay"
           class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-        >
+          aria-hidden="true"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="searchTitle"
+          >
           <form
             id="searchForm"
             class="w-[90%] max-w-lg rounded-3xl bg-white p-6 shadow-xl"
           >
+          <h2 id="searchTitle" class="sr-only">Search Listings</h2>
+
             <div class="flex items-center gap-3">
+            <label for="searchInput" class="sr-only">Search Listings</label>
               <input
                 type="search"
                 id="searchInput"

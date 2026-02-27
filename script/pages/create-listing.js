@@ -26,7 +26,7 @@ function renderCreateListing() {
             href="./index.html"
             class="inline-flex items-center gap-2 rounded-full bg-zinc-200 px-5 py-2 text-sm font-semibold hover:bg-zinc-300 transition"
           >
-            <i class="fas fa-arrow-left" aria-hidden="true"></i> Back to Home
+            <i class="fas fa-arrow-left" aria-hidden="true" aria-label="Back to Home"></i> Back to Home
           </a>
         </div>
         <form id="createListingForm" class="mt-6 grid gap-5">
@@ -64,7 +64,7 @@ function renderCreateListing() {
 
           <div class="grid gap-5 md:grid-cols-2">
             <label class="grid gap-2 text-sm">
-              <span class="font-semibold">End Date/time</span>
+              <span class="font-semibold">End date/time</span>
               <input
                 type="datetime-local"
                 id="endsAt"

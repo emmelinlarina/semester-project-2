@@ -125,6 +125,7 @@ function renderProfile() {
           id="tabListings" 
           class="tabPanel"
           role="tabpanel"
+          tabindex="0"
           aria-labelledby="tabListingsBtn"
           >
             <h2 id="listingsHeader" class="text-lg font-semibold">Listings</h2>
@@ -132,20 +133,24 @@ function renderProfile() {
               Listings you created
             </p>
 
-            <div id="activeListingsHeader" class="mt-4"></div>
+            <h3 id="activeListingsHeader" class="mt-4">
+            Active Listings
+            </h3>
             <div
               id="activeListingsGrid"
               class="mt-3 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
             ></div>
 
-            <div id="expiredListingsHeader" class="mt-10"></div>
+            <h3 id="expiredListingsHeader" class="mt-10">
+              Expired Listings
+            </h3>
             <div
               id="expiredListingsGrid"
               class="mt-3 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
             ></div>
           </div>
 
-          <div id="tabBids" class="tabPanel hidden" role="tabpanel" aria-labelledby="tabBidsBtn">
+          <div id="tabBids" class="tabPanel" hidden role="tabpanel" aria-labelledby="tabBidsBtn" tabindex="-1">
             <h2 class="text-lg font-semibold">Bids</h2>
             <p class="mt-1 text-sm text-zinc-500">Bids you placed</p>
             <div
@@ -183,7 +188,7 @@ function renderProfile() {
               type="button"
               aria-label="Close"
             >
-              <i class="fa-solid fa-xmark"></i>
+              <i class="fa-solid fa-xmark" aria-hidden="true"></i>
             </button>
           </div>
 
@@ -494,7 +499,7 @@ function renderEditListingPreview(files = []) {
               aria-label="Remove image"
               data-remove-edit-file="${i}"
             >
-              <i class="fas fa-xmark"></i>
+              <i class="fas fa-xmark" aria-hidden="true"></i>
             </button>
         `;
     editListingPreview.appendChild(card);
@@ -719,7 +724,6 @@ function listingCard(listing, { showActions = true } = {}) {
         </div>
       </div>
     </a>
-
     <div class="px-4 pb-4 flex items-center justify-between gap-3">
         <a
          href="./user-profile.html?name=${encodeURIComponent(seller)}" 
@@ -922,10 +926,7 @@ async function loadListingsOnce(force = false) {
   `;
 
     if (activeListingsHeader) {
-      activeListingsHeader.innerHTML = section(
-        "Active Listings",
-        active.length,
-      );
+      activeListingsHeader.textContent = `Active Listings (${active.length})`;
     }
 
     if (activeListingsGrid) {
@@ -938,10 +939,7 @@ async function loadListingsOnce(force = false) {
     }
 
     if (expiredListingsHeader) {
-      expiredListingsHeader.innerHTML = section(
-        "Expired Listings",
-        expired.length,
-      );
+      expiredListingsHeader.textContent = `Expired Listings (${expired.length})`;
     }
 
     if (expiredListingsGrid) {

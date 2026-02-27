@@ -86,7 +86,6 @@ function renderHome() {
         <div
           class="mt-4 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
           id="galleryGrid"
-          aria-label="Gallery"
         ></div>
         
         <nav class="mt-6 flex items-center justify-center gap-4" aria-label="Pagination">

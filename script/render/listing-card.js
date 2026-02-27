@@ -45,10 +45,15 @@ export function cardTemplate(
 
   const href = `${hrefBase}?id=${listing.id}`;
 
+  const titleId = `listing-title-${listing.id}`;
+  const descriptionId = `listing-description-${listing.id}`;
+  const mediaId = `listing-media-${listing.id}`;
+
   return ` 
     <a href="${href}" 
     class="block rounded-lg transition-shadow duration-300"
-    aria-label="View Listing: ${title}. Seller: ${sellerName}. Current bid: ${bid} dollars. ${timeSr}."
+    aria-labelledby="${titleId}"
+    aria-describedby="${mediaId} ${descriptionId}"
     >
       <img 
       src="${image}" 
@@ -58,17 +63,17 @@ export function cardTemplate(
       onerror='this.onerror=null;this.src="${FALLBACK_IMAGE}"'/>
 
       <div class="p-4">
-        <h3 class="text-lg font-semibold mb-2">${title}</h3>
+        <h3 class="text-lg font-semibold mb-2" id="${titleId}">${title}</h3>
 
-        <span class="text-xs text-gray-500" aria-hidden="true">${time}</span>
-        <p class="text-sm text-gray-600 mb-4">${description}</p>
+        <span class="text-xs text-gray-500">${time}</span>
+        <p class="text-sm text-gray-600 mb-4" id="${descriptionId}">${description}</p>
 
         <div class="flex items-center justify-between">
           <span class="text-sm font-bold">${bid} $</span>
           
           <span
+          id="${mediaId}"
           class="text-xs text-zinc-700 hover:underline underline-offset-2 group-hover:underline"
-          aria-label='View profile of ${sellerName}'
           >
           @${sellerName}
           </span>

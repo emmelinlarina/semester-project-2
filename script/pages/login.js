@@ -54,7 +54,7 @@ function renderLogin() {
           <button
             type="submit"
             class="mt-2 inline-flex w-full items-center justify-center rounded-md bg-brand-700 px-4 py-3 text-xl font-semibold font-rasa text-white hover:bg-brand-600 hover:text-brand-700 border-transparent hover:border-brand-700 focus:ring-2 focus:ring-brand-700 focus:ring-offset-2 tracking-wider"
-            aria-label="Login"
+            
           >
             LOGIN
           </button>
@@ -64,7 +64,7 @@ function renderLogin() {
             <a
               href="./register.html"
               class="font-medium text-brand-700 hover:text-brand-600"
-              aria-label="Sign up"
+              
               >Sign up</a
             >
           </p>

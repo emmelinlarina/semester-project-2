@@ -19,7 +19,7 @@ function renderSingle() {
       href="./index.html"
       class="inline-flex items-center gap-2 text-sm text-zinc-600 hover:text-zinc-900"
       >
-    <i class="fas fa-arrow-left"></i> Back to Gallery
+    <i class="fas fa-arrow-left" aria-hidden="true"></i> Back to Gallery
   </a>
   <section id="listingRoot" class="mt-6"></section>
   `;
@@ -75,6 +75,8 @@ function singleListingTemplate(listing) {
           <div 
           id="galleryRegion"
           tabindex="0"
+          role="region"
+          aria-labelledby="galleryTitle"
           aria-label="Image gallery"
           class="relative focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500">
             <img
@@ -126,7 +128,7 @@ function singleListingTemplate(listing) {
                 }"
                 data-index="${index}"
                 aria-label="Open image ${index + 1} of ${images.length}"
-                aria-current="${index === 0 ? "true" : "false"}"
+                aria-pressed="${index === 0 ? "true" : "false"}"
               >
               <img 
                 src="${url}"
@@ -178,9 +180,9 @@ function singleListingTemplate(listing) {
           
             <div class="mt-6 rounded-2xl border border-zinc-200 bg-white p-4">
                 <div class="flex items-center justify-between gap-4">
-                  <p class="text-sm text-gray-500 mb-3">
+                  <h2 class="text-sm text-gray-500 mb-3">
                   Place a bid
-                  </p>
+                  </h2>
                   <span class="text-xs px-2 py-1 rounded-full border border-zinc-200">
                       ${isEnded ? "Ended" : "Active"}
                   </span>
@@ -198,7 +200,7 @@ function singleListingTemplate(listing) {
                     Minimum bid: <span class="font-semibold">${highestBid + 1} $</span>
                 </p>
 
-                <form id="bidForm" class="mt-3 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3">
+                <form id="bidForm" class="mt-3 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 sr-only">
                   <input
                     id="bidAmount"
                     type="number"

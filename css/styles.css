@@ -288,6 +288,12 @@
   .col-span-full {
     grid-column: 1 / -1;
   }
+  .m-4 {
+    margin: calc(var(--spacing) * 4);
+  }
+  .m-10 {
+    margin: calc(var(--spacing) * 10);
+  }
   .mx-auto {
     margin-inline: auto;
   }
