@@ -6,14 +6,16 @@ export function renderNav(mountId = "navMount", { enableSearch = true } = {}) {
   if (!mount) return;
 
   mount.innerHTML = `
-  <header class="border-b border-zinc-200 bg-white">
+  <header class="sticky top-0 z-40 border-b border-zinc-200/70 bg-white/80 backdrop-blur supports-backdrop-filter:bg-white/60">
+    <nav class="mx-auto max-w-6xl px-4 py-4" aria-label="Primary navigation">
+      <div class="rounded-full bg-brand-600/20 px-3 py-2 shadow-sm">
 
-      <nav class="mx-auto max-w-6xl px-4 py-4" aria-label="Primary navigation">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
+      <div class="grid grid-cols-3 items-center">
+      <div class="flex items-center gap-1 md:gap-2 justify-self-start">
+
             <a
               href="./index.html"
-              class="rounded-full bg-zinc-200 px-5 py-1 text-sm md:text-xl tracking-wide"
+              class="inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm md:text-2xl tracking-wide text-brand-700 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2"
             >
               AUCTION HOUSE
             </a>
@@ -24,63 +26,60 @@ export function renderNav(mountId = "navMount", { enableSearch = true } = {}) {
             <button
               id="searchToggle"
               type="button"
-              class="inline-flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-full bg-zinc-200 hover:bg-zinc-300 transition"
+              class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand-600/50 hover:bg-brand-600/80 transition shadow-sm hover:shadow-md hover:-translate-y-px focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2"
               aria-label="Search"
               aria-controls="searchOverlay"
               aria-expanded="false"
             >
-              <i class="fas fa-search" aria-hidden="true"></i>
+              <i class="fas fa-search text-brand-700" aria-hidden="true"></i>
             </button>
             `
                 : ""
             }
+          </div>
 
+          <div class="justify-self-center">
             <!-- Create + (logged in only) -->
             <a
               id="navCreate"
               href="./create-listing.html"
-              class="hidden h-10 w-10 items-center justify-center rounded-full bg-zinc-200 hover:bg-zinc-300 transition"
+              class="hidden font-rasa h-10 w-28 items-center justify-center gap-2 rounded-full border-brand-700/30 bg-brand-600/50 hover:bg-brand-600/80 text-xl text-brand-700 hover:-translate-y-px transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2"
               aria-label="Create listing"
             >
-              <i class="fas fa-plus" aria-hidden="true"></i>
+              <i class="fa-solid fa-circle-plus" aria-hidden="true"></i>
+              <span class="hidden sm:inline font-semibold">Create</span>
             </a>
           </div>
 
           <!-- DESKTOP: Logged OUT -->
-          <div id="navLoggedOut" class="hidden items-center">
-            <div
-              class="flex items-center gap-2 h-10 justify-center rounded-full bg-zinc-200 px-5 text-sm hover:bg-zinc-300 transition"
-            >
-              <a
-                href="./login.html"
-                class="inline-flex h-10 items-center justify-center rounded-full px-5 text-sm hover:font-extrabold"
+          <div id="navLoggedOut" class="hidden md:flex items-center gap-2">
+              <a href="./login.html"
+                class="inline-flex h-10 items-center justify-center rounded-full border border-brand-600/40 bg-white px-5 text-sm text-brand-700 hover:bg-zinc-50 hover:-translate-y-px transition"
                 aria-label="Log in"
               >
                 LOG IN
               </a>
-              <span class="text-zinc-500">|</span>
-              <a
-                href="./register.html"
-                class="inline-flex h-10 items-center justify-center rounded-full px-5 text-sm hover:font-extrabold"
+              <a href="./register.html"
+                class="inline-flex h-10 items-center justify-center rounded-full border bg-brand-700 px-5 text-sm font-semibold text-white  hover:-translate-y-px transition"
                 aria-label="Sign up"
               >
                 SIGN UP
               </a>
-            </div>
+            
           </div>
 
           <!-- DESKTOP: Logged IN -->
-          <div id="navLoggedIn" class="hidden items-center gap-2">
+          <div id="navLoggedIn" class="hidden items-center gap-2 justify-self-end">
             <span
               id="navCredits"
-              class="inline-flex h-10 items-center justify-center rounded-full bg-zinc-200 px-5 text-sm font-semibold"
+              class="inline-flex h-10 items-center justify-center rounded-full  bg-brand-600/40 px-4 text-lg text-brand-700 font-semibold"
             >
               0 $
             </span>
 
             <a
               href="./user-profile.html"
-              class="inline-flex h-10 items-center justify-center rounded-full bg-zinc-200 px-5 text-sm hover:bg-zinc-300 transition"
+              class="inline-flex h-10 items-center justify-center rounded-full bg-brand-600/40 hover:bg-brand-600/80 px-5 text-base text-brand-700 transition"
             >
               PROFILE
             </a>
@@ -88,17 +87,17 @@ export function renderNav(mountId = "navMount", { enableSearch = true } = {}) {
             <button
               id="logoutBtn"
               type="button"
-              class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-zinc-200 hover:bg-zinc-300 transition"
+              class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand-600/40 hover:bg-brand-600/80 transition"
               aria-label="Log out"
             >
-              <i class="fas fa-right-from-bracket" aria-hidden="true"></i>
+              <i class="fas fa-right-from-bracket text-brand-700" aria-hidden="true"></i>
             </button>
           </div>
 
           <!-- MOBILE ICON: Profile (only logged in) -->
           <span
             id="mobileCreditsTop"
-            class="hidden h-10 items-center justify-center rounded-full bg-zinc-200 px-5 text-sm font-semibold"
+            class="hidden h-10 items-center justify-center rounded-full bg-brand-600/50 hover:bg-brand-600/80 px-5 text-sm font-semibold"
           >
             0 $
           </span>
@@ -106,22 +105,22 @@ export function renderNav(mountId = "navMount", { enableSearch = true } = {}) {
             <a
               id="mobileProfileIcon"
               href="./user-profile.html"
-              class="hidden h-8 w-8 items-center justify-center rounded-full bg-zinc-200 hover:bg-zinc-300 transition"
+              class="hidden h-8 w-8 items-center justify-center rounded-full bg-brand-600/50 hover:bg-brand-600/80 transition"
               aria-label="Profile"
             >
-              <i class="fas fa-user" aria-hidden="true"></i>
+              <i class="fas fa-user text-brand-700" aria-hidden="true"></i>
             </a>
 
             <!-- MOBILE: Hamburger -->
             <button
               id="navMenu"
               type="button"
-              class="inline-flex md:hidden h-8 w-8 items-center justify-center rounded-full bg-zinc-200 hover:bg-zinc-300 transition"
+              class="inline-flex md:hidden h-8 w-8 items-center justify-center rounded-full bg-brand-600/50 hover:bg-brand-600/80 transition"
               aria-label="Open menu"
               aria-controls="mobileMenu"
               aria-expanded="false"
             >
-              <i class="fas fa-bars" aria-hidden="true"></i>
+              <i class="fas fa-bars text-brand-700" aria-hidden="true"></i>
             </button>
           </div>
         </div>
@@ -195,22 +194,23 @@ export function renderNav(mountId = "navMount", { enableSearch = true } = {}) {
 
             <a
               href="./user-profile.html"
-              class="block rounded-lg px-4 py-3 text-sm font-semibold hover:bg-zinc-100"
+              class="block rounded-lg px-4 py-3 text-sm font-semibold hover:bg-zinc-100 text-brand-700"
               >PROFILE</a
             >
             <a
               href="./create-listing.html"
-              class="mt-1 block rounded-lg px-4 py-3 text-sm font-semibold hover:bg-zinc-100"
+              class="mt-1 block rounded-lg px-4 py-3 text-sm font-semibold hover:bg-zinc-100 text-brand-700"
               >CREATE LISTING</a
             >
             <button
               id="mobileLogoutBtn"
               type="button"
-              class="mt-1 w-full rounded-lg px-4 py-3 text-left text-sm font-semibold hover:bg-zinc-100"
+              class="mt-1 w-full rounded-lg px-4 py-3 text-left text-sm font-semibold hover:bg-zinc-100 text-brand-700"
             >
               LOG OUT
             </button>
           </div>
+        </div>
         </div>
       </nav>
     </header>
