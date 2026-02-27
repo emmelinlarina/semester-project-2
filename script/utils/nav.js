@@ -7,15 +7,15 @@ export function renderNav(mountId = "navMount", { enableSearch = true } = {}) {
 
   mount.innerHTML = `
   <header class="sticky top-0 z-40 border-b border-zinc-200/70 bg-white/80 backdrop-blur supports-backdrop-filter:bg-white/60">
-    <nav class="mx-auto max-w-6xl px-4 py-4" aria-label="Primary navigation">
-      <div class="rounded-full bg-brand-600/20 px-3 py-2 shadow-sm">
+    <nav class="mx-auto max-w-6xl px-6 py-3" aria-label="Primary navigation">
+      <div class="rounded bg-brand-600/20 px-3 py-3 shadow-sm">
 
-      <div class="grid grid-cols-3 items-center">
+      <div class="flex items-center gap-2 justify-between md:gap-4">
       <div class="flex items-center gap-1 md:gap-2 justify-self-start">
 
             <a
               href="./index.html"
-              class="inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm md:text-2xl tracking-wide text-brand-700 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2"
+              class="inline-flex items-center gap-2 rounded-full px-5 py-1 text-sm md:text-lg lg:text-2xl tracking-wide text-brand-700 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2"
             >
               AUCTION HOUSE
             </a>
@@ -26,7 +26,7 @@ export function renderNav(mountId = "navMount", { enableSearch = true } = {}) {
             <button
               id="searchToggle"
               type="button"
-              class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand-600/50 hover:bg-brand-600/80 transition shadow-sm hover:shadow-md hover:-translate-y-px focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2"
+              class="inline-flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-brand-600/50 hover:bg-brand-600/80 transition shadow-sm hover:shadow-md hover:-translate-y-px focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2"
               aria-label="Search"
               aria-controls="searchOverlay"
               aria-expanded="false"
@@ -43,11 +43,13 @@ export function renderNav(mountId = "navMount", { enableSearch = true } = {}) {
             <a
               id="navCreate"
               href="./create-listing.html"
-              class="hidden font-rasa h-10 w-28 items-center justify-center gap-2 rounded-full border-brand-700/30 bg-brand-600/50 hover:bg-brand-600/80 text-xl text-brand-700 hover:-translate-y-px transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2"
+              class="hidden font-rasa h-10 w-28 sm:h-8 sm:w-24 items-center justify-center gap-2 rounded-full border-brand-700/30 bg-brand-600/50 hover:bg-brand-600/80 text-xl md:text-lg text-brand-700 hover:-translate-y-px transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2"
               aria-label="Create listing"
             >
               <i class="fa-solid fa-circle-plus" aria-hidden="true"></i>
-              <span class="hidden sm:inline font-semibold">Create</span>
+              <span class="hidden sm:inline font-semibold"
+              >Create
+              </span>
             </a>
           </div>
 
@@ -79,7 +81,7 @@ export function renderNav(mountId = "navMount", { enableSearch = true } = {}) {
 
             <a
               href="./user-profile.html"
-              class="inline-flex h-10 items-center justify-center rounded-full bg-brand-600/40 hover:bg-brand-600/80 px-5 text-base text-brand-700 transition"
+              class="inline-flex h-10 md:text-xs sm:text-xs items-center justify-center rounded-full bg-brand-600/40 hover:bg-brand-600/80 px-4 text-base text-brand-700 transition"
             >
               PROFILE
             </a>
@@ -101,7 +103,7 @@ export function renderNav(mountId = "navMount", { enableSearch = true } = {}) {
           >
             0 $
           </span>
-          <div class="flex items-center gap-2 md:hidden">
+          <div class="flex items-center gap-2 md:hidden ml-auto">
             <a
               id="mobileProfileIcon"
               href="./user-profile.html"

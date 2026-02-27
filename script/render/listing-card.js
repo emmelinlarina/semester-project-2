@@ -1,5 +1,5 @@
 export const FALLBACK_IMAGE =
-  "data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%27600%27%20height=%27400%27%3E%3Crect%20width=%27100%25%27%20height=%27100%25%27%20fill=%27%23e5e7eb%27/%3E%3Ctext%20x=%2750%25%27%20y=%2750%25%27%20dominant-baseline=%27middle%27%20text-anchor=%27middle%27%20fill=%27%236b7280%27%20font-family=%27Arial%27%20font-size=%2722%27%3ENo%20Image%3C/text%3E%3C/svg%3E";
+  "data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%27600%27%20height=%27600%27%3E%3Crect%20width=%27100%25%27%20height=%27100%25%27%20fill=%27%23ffffff%27/%3E%3Ctext%20x=%2750%25%27%20y=%2750%25%27%20dominant-baseline=%27middle%27%20text-anchor=%27middle%27%20fill=%27%236b7280%27%20font-family=%27Arial%27%20font-size=%2720%27%3ENo%20Image%3C/text%3E%3C/svg%3E";
 
 export function getHighestBid(listing) {
   const bids = listing.bids ?? [];
@@ -51,30 +51,35 @@ export function cardTemplate(
 
   return ` 
     <a href="${href}" 
-    class="block rounded-lg transition-shadow duration-300"
-    aria-labelledby="${titleId}"
-    aria-describedby="${mediaId} ${descriptionId}"
-    >
-      <img 
-      src="${image}" 
-      alt="${imgAlt}" 
-      class="w-full h-48 object-cover bg-zinc-200" 
-      loading="lazy" 
-      onerror='this.onerror=null;this.src="${FALLBACK_IMAGE}"'/>
+      class="flex flex-col group h-full rounded-lg transition-shadow duration-300 border border-zinc-200 bg-zinc-50"
+      aria-labelledby="${titleId}"
+      aria-describedby="${mediaId} ${descriptionId}"
+    > 
+      <div class="aspect-square w-full overflow-hidden rounded-t-lg">
+        <img 
+        src="${image}" 
+        alt="${imgAlt}" 
+        class="w-full h-full object-cover " 
+        loading="lazy" 
+        onerror='this.onerror=null;this.src="${FALLBACK_IMAGE}"'
+        />
+      </div>
+      
+      <div class="p-4 flex flex-col flex-1">
+        <h3 class="text-2xl font-semibold mb-2 line-clamp-1" id="${titleId}">${title}</h3>
 
-      <div class="p-4">
-        <h3 class="text-lg font-semibold mb-2" id="${titleId}">${title}</h3>
+        <span class="text-lg text-gray-900 font-bold">${time}</span>
 
-        <span class="text-xs text-gray-500">${time}</span>
-        <p class="text-sm text-gray-600 mb-4" id="${descriptionId}">${description}</p>
+        <p class="text-base text-gray-600 mb-4 line-clamp-2" id="${descriptionId}">${description}</p>
 
-        <div class="flex items-center justify-between">
-          <span class="text-sm font-bold">${bid} $</span>
+
+        <div class="flex items-center justify-between mt-auto pt-3">
+          <span class="text-lg font-bold tabular-nums">${bid} $</span>
           
           <span
-          id="${mediaId}"
-          class="text-xs text-zinc-700 hover:underline underline-offset-2 group-hover:underline"
-          >
+            id="${mediaId}"
+            class="text-sm text-zinc-700 hover:underline underline-offset-2"
+            >
           @${sellerName}
           </span>
         </div>
@@ -110,8 +115,8 @@ export function skeletonCard(count = 12) {
   return Array.from({ length: count })
     .map(
       () => `
-      <div class="block rounded-lg overflow-hidden shadow-md animate-pulse">
-        <div class="w-full h-48 bg-zinc-300"></div>
+      <div class="block rounded-lg overflow-hidden border border-zinc-200 animate-pulse">
+        <div class="w-full aspect-square bg-zinc-300"></div>
 
         <div class="p-4">
 
