@@ -150,7 +150,7 @@ function renderProfile() {
             ></div>
           </div>
 
-          <div id="tabBids" class="tabPanel" hidden role="tabpanel" aria-labelledby="tabBidsBtn" tabindex="-1">
+          <div id="tabBids" class="tabPanel hidden" role="tabpanel" aria-labelledby="tabBidsBtn" tabindex="-1">
             <h2 class="text-lg font-semibold">Bids</h2>
             <p class="mt-1 text-sm text-zinc-500">Bids you placed</p>
             <div
@@ -1014,22 +1014,30 @@ async function loadBidsOnce() {
       (a, b) => new Date(b.endsAt).getTime() - new Date(a.endsAt).getTime(),
     );
 
-    const section = (label) => `
+    const section = (label, tone = "success") => {
+      const color =
+        tone === "error"
+          ? "text-error-100"
+          : tone === "success"
+            ? "text-success-100"
+            : "text-gray-100";
+      return `
       <div class="col-span-full mt-4">
-        <p class="text-sm font-semibold text-gray-700 mb-2">${label}</p>
+        <p class="text-lg font-semibold ${color} mb-2">${label}</p>
       </div>
     `;
+    };
 
     const htmlParts = [
       ...(active.length
         ? [
-            section("Active Bids"),
+            section("Active Bids", "success"),
             ...active.map((l) => listingCard(l, { showActions: false })),
           ]
         : []),
       ...(expired.length
         ? [
-            section("Expired Bids"),
+            section("Expired Bids", "error"),
             ...expired.map((l) => listingCard(l, { showActions: false })),
           ]
         : []),
