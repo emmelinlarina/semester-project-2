@@ -123,7 +123,7 @@ function singleListingTemplate(listing) {
               (url, index) => `
               <button 
                 type="button"
-                class="imgThumb rounded-xl overflow-hidden border border-zinc-200 ${
+                class="imgThumb rounded-xl aspect-square overflow-hidden border border-zinc-200 ${
                   index === 0 ? "ring-2 ring-zinc-800" : ""
                 }"
                 data-index="${index}"
@@ -133,7 +133,7 @@ function singleListingTemplate(listing) {
               <img 
                 src="${url}"
                 alt="${title} - Thumbnail ${index + 1} of ${images.length}"
-                class="w-full h-20 object-cover bg-zinc-200"
+                class="w-full h-full aspect-square object-cover bg-zinc-200"
                 loading="lazy"
                 onerror='this.onerror=null;this.src="${FALLBACK_IMAGE}"'
               />

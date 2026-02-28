@@ -214,13 +214,13 @@ function renderPreviews() {
 
     const card = document.createElement("div");
     card.className =
-      "relative rounded-2xl overflow-hidden border border-zinc-200 bg-zinc-50";
+      "relative aspect-square rounded-2xl overflow-hidden border border-zinc-200 bg-zinc-50";
 
     card.innerHTML = `
             <img 
                 src="${url}"
                 alt="Selected image ${i + 1}"
-                class="w-full h-24 object-cover bg-zinc-200"
+                class="w-full h-full object-cover bg-zinc-200"
                 loading="lazy"
             />
             <button
@@ -238,13 +238,13 @@ function renderPreviews() {
   if (selectedFiles.length === 0 && selectedUrl) {
     const card = document.createElement("div");
     card.className =
-      "relative rounded-2xl overflow-hidden border border-zinc-200 bg-zinc-50";
+      "relative aspect-square rounded-2xl overflow-hidden border border-zinc-200 bg-zinc-50";
 
     card.innerHTML = `
             <img 
                 src="${selectedUrl}"
                 alt="Media URL preview"
-                class="w-full h-24 object-cover bg-zinc-200"
+                class="w-full h-full aspect-square object-cover bg-zinc-200"
                 loading="lazy"
             />
             <button

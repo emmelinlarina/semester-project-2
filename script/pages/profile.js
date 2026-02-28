@@ -706,7 +706,7 @@ function listingCard(listing, { showActions = true } = {}) {
     href="./single-listing.html?id=${encodeURIComponent(id)}" 
     class="block transition-shadow duration-300"
     >
-      <div class="h-48 bg-zinc-100">
+      <div class="aspect-square w-full bg-zinc-100">
         <img 
         src="${img}" 
         alt="${title}" 
