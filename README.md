@@ -27,7 +27,7 @@ The project focuses on integrating authentication, API communication, dynamic re
 
 ```
 email: bingi@stud.noroff.no
-password: Bingi1234
+password: Bingi123
 ```
 
 ## Setup
@@ -88,4 +88,4 @@ This structure helps improve maintainability and readability.
 
 ## Live Demo - GitHub Pages
 
-//
+(https://emmelinlarina.github.io/semester-project-2/index.html)
