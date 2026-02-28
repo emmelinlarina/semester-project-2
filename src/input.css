@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-600: #b592a1;
+  --color-brand-700: #3e1929;
+  --color-brown-500: #78350f;
+  --color-accent-100: #8d91c7;
+  --color-accent-200: #b0daf1;
+  --color-accent-300: #a2c5ac;
+  --color-info-100: #86c7ea;
+  --color-success-100: #68a178;
+  --color-warning-100: #fda05e;
+  --color-error-100: #9c4d43;
+
+  --font-radley: "Radley", serif;
+  --font-rasa: "Rasa", serif;
+}
+
+@layer base {
+  button {
+    @apply cursor-pointer;
+  }
+}

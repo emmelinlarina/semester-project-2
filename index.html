@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Home Page</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Home Page" />
+
+    <script
+      src="https://kit.fontawesome.com/e0e8f3b90b.js"
+      crossorigin="anonymous"
+    ></script>
+
+    <link rel="stylesheet" href="./css/styles.css" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Radley:ital@0;1&family=Rasa:ital,wght@0,300..700;1,300..700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body class="bg-white text-zinc-900 font-radley">
+    <a
+      href="#homeMount"
+      class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-full focus:bg-white focus:px-4 focus:py-2 focus:shadow"
+    >
+      Skip to content
+    </a>
+
+    <header id="navMount"></header>
+
+    <main
+      id="homeMount"
+      class="mx-auto max-w-6xl px-4 py-8 font-rasa"
+      tabindex="-1"
+    ></main>
+
+    <script type="module" src="./script/pages/home.js"></script>
+  </body>
+</html>

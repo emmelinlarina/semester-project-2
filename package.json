@@ -1,0 +1,26 @@
+{
+  "name": "semester-project-2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tailwindcss -c ./tailwind.config.js -i  ./src/input.css -o ./css/styles.css --watch",
+    "build": "tailwindcss -c ./tailwind.config.js -i ./src/input.css -o ./css/styles.css --minify"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/emmelinlarina/semester-project-2.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/emmelinlarina/semester-project-2/issues"
+  },
+  "homepage": "https://github.com/emmelinlarina/semester-project-2#readme",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.18",
+    "tailwindcss": "^4.1.18"
+  }
+}
