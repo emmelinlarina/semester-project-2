@@ -8,7 +8,7 @@ export function renderNav(mountId = "navMount", { enableSearch = true } = {}) {
   mount.innerHTML = `
   <header class="sticky top-0 z-40 border-b border-zinc-200/70 bg-white/80 backdrop-blur supports-backdrop-filter:bg-white/60">
     <nav class="mx-auto max-w-6xl px-6 py-3" aria-label="Primary navigation">
-      <div class="rounded bg-brand-600/20 px-3 py-3 shadow-sm">
+      <div class="rounded  px-3 py-3">
 
       <div class="flex items-center gap-2 justify-between md:gap-4">
       <div class="flex items-center gap-1 md:gap-2 justify-self-start">
@@ -26,7 +26,7 @@ export function renderNav(mountId = "navMount", { enableSearch = true } = {}) {
             <button
               id="searchToggle"
               type="button"
-              class="inline-flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-brand-600/50 hover:bg-brand-600/80 transition shadow-sm hover:shadow-md hover:-translate-y-px focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2"
+              class="inline-flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-brand-600/20 bg-brand-600/50 hover:bg-brand-600/80 transition shadow-sm hover:shadow-md hover:-translate-y-px focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2"
               aria-label="Search"
               aria-controls="searchOverlay"
               aria-expanded="false"
@@ -43,12 +43,12 @@ export function renderNav(mountId = "navMount", { enableSearch = true } = {}) {
             <a
               id="navCreate"
               href="./create-listing.html"
-              class="hidden font-rasa h-10 w-28 sm:h-8 sm:w-24 items-center justify-center gap-2 rounded-full border-brand-700/30 bg-brand-600/50 hover:bg-brand-600/80 text-xl md:text-lg text-brand-700 hover:-translate-y-px transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2"
+              class="hidden font-rasa items-center justify-center gap-2 hover:-translate-y-px text-2xl text-brand-700 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2"
               aria-label="Create listing"
             >
-              <i class="fa-solid fa-circle-plus" aria-hidden="true"></i>
+              <i class="fa-solid fa-circle-plus text-2xl" aria-hidden="true"></i>
               <span class="hidden sm:inline font-semibold"
-              >Create
+              >CREATE
               </span>
             </a>
           </div>
@@ -74,14 +74,14 @@ export function renderNav(mountId = "navMount", { enableSearch = true } = {}) {
           <div id="navLoggedIn" class="hidden items-center gap-2 justify-self-end">
             <span
               id="navCredits"
-              class="inline-flex h-10 items-center justify-center rounded-full  bg-brand-600/40 px-4 text-lg text-brand-700 font-semibold"
+              class="inline-flex h-8 items-center justify-center rounded-2xl  bg-brand-600/20 px-3 text-lg text-brand-700 font-semibold"
             >
               0 $
             </span>
 
             <a
               href="./user-profile.html"
-              class="inline-flex h-10 md:text-xs sm:text-xs items-center justify-center rounded-full bg-brand-600/40 hover:bg-brand-600/80 px-4 text-base text-brand-700 transition"
+              class="inline-flex  md:text-sm sm:text-xs items-center justify-center px-4 text-base text-brand-700 hover:-translate-y-px transition"
             >
               PROFILE
             </a>
@@ -89,17 +89,17 @@ export function renderNav(mountId = "navMount", { enableSearch = true } = {}) {
             <button
               id="logoutBtn"
               type="button"
-              class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand-600/40 hover:bg-brand-600/80 transition"
+              class="inline-flex  w-8 items-center justify-center rounded-sm transition hover:-translate-y-px"
               aria-label="Log out"
             >
-              <i class="fas fa-right-from-bracket text-brand-700" aria-hidden="true"></i>
+              <i class="fas fa-right-from-bracket text-brand-700 text-lg" aria-hidden="true"></i>
             </button>
           </div>
 
           <!-- MOBILE ICON: Profile (only logged in) -->
           <span
             id="mobileCreditsTop"
-            class="hidden h-10 items-center justify-center rounded-full bg-brand-600/50 hover:bg-brand-600/80 px-5 text-sm font-semibold"
+            class="hidden h-8 items-center justify-center rounded-full bg-brand-600/50 hover:bg-brand-600/80 px-5 text-sm font-semibold"
           >
             0 $
           </span>

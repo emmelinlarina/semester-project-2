@@ -133,7 +133,7 @@ function renderProfile() {
               Listings you created
             </p>
 
-            <h3 id="activeListingsHeader" class="mt-4">
+            <h3 id="activeListingsHeader" class="mt-6 text-lg font-semibold text-success-100">
             Active Listings
             </h3>
             <div
@@ -141,7 +141,7 @@ function renderProfile() {
               class="mt-3 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
             ></div>
 
-            <h3 id="expiredListingsHeader" class="mt-10">
+            <h3 id="expiredListingsHeader" class="mt-10 text-lg font-semibold text-error-100">
               Expired Listings
             </h3>
             <div
@@ -704,7 +704,7 @@ function listingCard(listing, { showActions = true } = {}) {
   <article class="rounded-lg overflow-hidden shadow-md bg-white border border-zinc-200">
     <a 
     href="./single-listing.html?id=${encodeURIComponent(id)}" 
-    class="block hover:shadow-lg transition-shadow duration-300"
+    class="block transition-shadow duration-300"
     >
       <div class="h-48 bg-zinc-100">
         <img 
@@ -945,7 +945,7 @@ async function loadListingsOnce(force = false) {
     if (expiredListingsGrid) {
       expiredListingsGrid.innerHTML = expired.length
         ? expired.map((l) => listingCard(l, { showActions })).join("")
-        : emptyState("No expired listings", "");
+        : emptyState("", "");
     }
 
     return listings;

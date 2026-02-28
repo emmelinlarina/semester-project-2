@@ -234,7 +234,7 @@ function weeklyHeroTemplate(listing) {
     <div class="absolute inset-0 bg-black/10"></div>
   </div>
 
-  <div class="relative h-full flex items-end ">
+  <div class="relative h-full flex items-center justify-center mt-15">
     <div class="p-6 sm:p-10 max-w-2xl rounded-2xl bg-black/20 backdrop-blur-md border border-white/15 shadow-lg">
 
       <p class="text-lg tracking-[0.3em] text-white/80">

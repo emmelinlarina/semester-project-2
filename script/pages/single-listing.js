@@ -94,7 +94,7 @@ function singleListingTemplate(listing) {
             class="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/80 hover:bg-white p-2 shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500"
             aria-label="Previous Image"
             >
-              <i class="fas fa-chevron-left" aria-hidden="true"></i>
+              <i class="fas fa-chevron-left text-brand-700" aria-hidden="true"></i>
             </button>
 
             <button
@@ -150,29 +150,31 @@ function singleListingTemplate(listing) {
                 
 
                 <div class="grid gap-3 w-48">
-                  <div class="rounded-2xl bg-zinc-50 border border-zinc-200 px-4 py-3 text-center">
-                      <p class="text-xs uppercase tracking-widest text-gray-500">Highest Bid</p>
-                      <p class="mt-1 text-2xl font-bold text-gray-500">${bid}</p>
+                  <div class="rounded-2xl bg-brand-600/10 border border-brand-700/20 px-4 py-3 text-center">
+                      <p class="text-sm font-semibold uppercase tracking-widest text-brand-700">
+                      Highest Bid
+                      </p>
+                      <p class="mt-1 text-2xl font-bold text-brand-700">${bid} $</p>
                   </div>
-                  <div class="rounded-2xl bg-zinc-50 border border-zinc-200 px-4 py-3 text-center">
-                            <p class="text-xs uppercase tracking-widest text-gray-500">Time Left</p>
-                            <p class="mt-1 text-2xl font-bold text-gray-500">${time}</p>
+                  <div class="rounded-2xl bg-brand-600/10 border border-brand-700/20 px-4 py-3 text-center">
+                            <p class="text-sm font-semibold uppercase tracking-widest text-brand-700">Time Left</p>
+                            <p class="mt-1 text-2xl font-bold text-brand-700">${time}</p>
                   </div>
                 </div>
             </div>
 
-            <p class="mt-4 text-gray-700 whitespace-pre-wrap">${description}</p>
+            <p class="mt-4 text-gray-800 whitespace-pre-wrap">${description}</p>
             
 
             <div class="mt-6 grid grid-cols-2 gap-3 text-sm">
                 <div class="rounded-2xl bg-zinc-50 border border-zinc-200 p-4"> 
-                    <p class="text-gray-500">Seller</p>
+                    <p class="text-gray-700">Seller</p>
                     <a href="./user-profile.html?name=${encodeURIComponent(seller)}" class="font-medium text-zinc-900 hover:underline underline-offset-2 focus-visible:underline">${seller}</a>
                 </div>
 
                 
                     <div class="rounded-2xl bg-zinc-50 border border-zinc-200 p-4">
-                    <p class="text-gray-500">Ends at</p>
+                    <p class="text-gray-700">Ends at</p>
                     <p class="font-medium">${endsAt}</p>
                 </div>
             </div>
@@ -180,27 +182,27 @@ function singleListingTemplate(listing) {
           
             <div class="mt-6 rounded-2xl border border-zinc-200 bg-white p-4">
                 <div class="flex items-center justify-between gap-4">
-                  <h2 class="text-sm text-gray-500 mb-3">
+                  <h2 class="text-sm text-white mb-3">
                   Place a bid
                   </h2>
-                  <span class="text-xs px-2 py-1 rounded-full border border-zinc-200">
+                  <span class="text-sm px-2 py-1 rounded-full border border-brand-700 bg-brand-600/20 text-black-900 font-semibold">
                       ${isEnded ? "Ended" : "Active"}
                   </span>
                 </div>
 
                 ${
                   isEnded
-                    ? `<p class="text-xs text-red-600 mt-1">Auction Ended</p>`
+                    ? `<p class="text-xs text-error-100 mt-1">Auction Ended</p>`
                     : isOwner
-                      ? `<p class="text-xs text-zinc-600 mt-1">You own this listing - bidding disabled. </p>`
+                      ? `<p class="text-xs text-zinc-800 mt-1">You own this listing - bidding disabled. </p>`
                       : ""
                 }
 
-                <p class="text-xs text-zinc-500 mt-1">
+                <p class="text-sm text-zinc-500 mt-1">
                     Minimum bid: <span class="font-semibold">${highestBid + 1} $</span>
                 </p>
 
-                <form id="bidForm" class="mt-3 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 sr-only">
+                <form id="bidForm" class="mt-3 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3">
                   <input
                     id="bidAmount"
                     type="number"
