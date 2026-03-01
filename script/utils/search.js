@@ -6,7 +6,6 @@ const searchOverlay = document.getElementById("searchOverlay");
 const searchInput = document.getElementById("searchInput");
 const searchForm = document.getElementById("searchForm");
 
-//toggle search
 export function initSearch({
   onInput,
   onSubmit,

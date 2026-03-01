@@ -22,7 +22,6 @@ export async function getListings({
 
   if (active) params.set("_active", "true");
   if (query) params.set("q", query);
-  console.log("Listings url:", `auction/listings?${params.toString()}`);
 
   return apiFetch(`auction/listings?${params.toString()}`, {
     headers: apiKey ? { "X-Noroff-API-Key": apiKey } : {},

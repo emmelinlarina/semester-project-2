@@ -21,9 +21,7 @@ export async function uploadImage(file) {
     try {
       const data = await res.json();
       details = data.error?.message ? `: ${data.error.message}` : "";
-    } catch (err) {
-      // ignore
-    }
+    } catch (err) {}
 
     throw new Error(`Failed to upload image${details}`);
   }
