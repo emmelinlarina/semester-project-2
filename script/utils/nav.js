@@ -107,7 +107,7 @@ export function renderNav(mountId = "navMount", { enableSearch = true } = {}) {
             <a
               id="mobileProfileIcon"
               href="./user-profile.html"
-              class="hidden h-8 w-8 items-center justify-center rounded-full bg-brand-600/50 hover:bg-brand-600/80 transition"
+              class="invisible h-8 w-8 items-center justify-center rounded-full bg-brand-600/50 hover:bg-brand-600/80 transition"
               aria-label="Profile"
             >
               <i class="fas fa-user text-brand-700" aria-hidden="true"></i>
