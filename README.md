@@ -133,7 +133,7 @@ https://github.com/emmelinlarina/semester-project-2
 ## AI Usage
 
 AI tools were used as learning and development support.
-See [AI_LOG.md](AI_LOG.md) for further details.
+See AI_LOG.md for further details.
 
 ## Author
 
