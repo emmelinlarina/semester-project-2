@@ -10,15 +10,9 @@ Noroff Front-end Development
 - GitHub Copilot
 - ChatGPT
 
-## Purpose of AI Usage
-
-AI tools were used primarily as learning resources and for rubber duck debugging throughout the development process.
-
-My approach was to use AI for guidance, explanations, and discussing possible approaches rather than asking it to complete tasks or implement entire features for me.
-
-The goal was to better understand the problems I encountered, work through solutions, and develop my own understanding of the code.
-
 ## GitHub Copilot
+
+### Purpose
 
 GitHub Copilot was used for code autocomplete, guidance, rubber duck debugging, and troubleshooting during development.
 
@@ -35,18 +29,30 @@ Topics discussed through Copilot Chat included:
 
 I primarily used Copilot Chat to ask questions, understand errors, and explore possible solutions. In some cases, Copilot also identified issues and suggested or applied specific code changes.
 
-AI-assisted suggestions were reviewed as part of my development process. The goal was to improve efficiency and support my learning while remaining responsible for the final implementation.
+### Outcome
+
+Using Copilot helped me better understand JavaScript functionality, DOM rendering, and how different parts of the application interact.
+
+The debugging conversations helped me identify possible causes of errors and approach problems more systematically. I also gained a better understanding of accessibility and responsive design considerations.
+
+Autocomplete made writing repetitive code more efficient, allowing me to focus more on understanding and implementing functionality.
 
 ## ChatGPT
+
+### Purpose
 
 ChatGPT was used as a supplementary learning tool during the Portfolio 2 improvement process.
 
 It was primarily used for rubber duck debugging, discussing accessibility improvements, understanding JavaScript behavior, and reviewing project documentation.
 
-Suggestions were reviewed and adapted where relevant, with responsibility for the final implementation remaining my own.
+### Outcome
+
+The conversations helped me better understand accessibility concepts, reason through JavaScript issues, and improve the clarity of my project documentation.
+
+Using ChatGPT as a discussion tool also helped me reflect on my implementation decisions and approach improvements with a clearer understanding of their purpose.
 
 ## Independent Work and Responsibility
 
-AI was used to support learning, debugging, and development rather than replace my own work.
+AI tools were used to support learning, debugging, and development rather than replace my own work.
 
 Suggestions were reviewed and adapted where relevant. I remained responsible for the final implementation, decisions, testing, and submitted work.
