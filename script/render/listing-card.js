@@ -9,7 +9,10 @@ export function getHighestBid(listing) {
 export function timeLeft(endTime) {
   const end = new Date(endTime);
   const diff = end - Date.now();
-  if (diff <= 0) return "Ended";
+
+  if (!Number.isFinite(diff) || diff <= 0) {
+    return "Ended";
+  }
 
   const mins = Math.floor(diff / 60000);
   const hours = Math.floor(diff / 3600000);
@@ -41,7 +44,10 @@ export function cardTemplate(
   const timeSr =
     time === "Ended"
       ? "Auction ended"
-      : `Time left: ${time.replace("d", "days").replace("h", "hours").replace("m", "minutes")}`;
+      : `Time left: ${time
+          .replace(/(\d+)d/g, "$1 days")
+          .replace(/(\d+)h/g, "$1 hours")
+          .replace(/(\d+)m/g, "$1 minutes")}`;
 
   const href = `${hrefBase}?id=${listing.id}`;
 
@@ -51,7 +57,7 @@ export function cardTemplate(
 
   return ` 
     <a href="${href}" 
-      class="flex flex-col group h-full rounded-lg transition-shadow duration-300 border border-zinc-200 bg-zinc-50"
+      class="flex flex-col group h-full rounded-lg transition-shadow border border-zinc-200 bg-zinc-50 duration-300 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-2"
       aria-labelledby="${titleId}"
       aria-describedby="${mediaId} ${descriptionId}"
     > 
@@ -68,7 +74,10 @@ export function cardTemplate(
       <div class="p-4 flex flex-col flex-1">
         <h3 class="text-2xl font-semibold mb-2 line-clamp-1" id="${titleId}">${title}</h3>
 
-        <span class="text-lg text-gray-900 font-bold">${time}</span>
+        <span class="text-lg text-gray-900 font-bold">
+             <span aria-hidden="true">${time}</span>
+             <span class="sr-only">${timeSr}</span>
+        </span>
 
         <p class="text-base text-gray-600 mb-4 line-clamp-2" id="${descriptionId}">${description}</p>
 
