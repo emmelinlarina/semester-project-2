@@ -15,6 +15,7 @@ export function initSearch({
   const searchOverlay = document.getElementById("searchOverlay");
   const searchInput = document.getElementById("searchInput");
   const searchForm = document.getElementById("searchForm");
+  const searchClose = document.getElementById("searchClose");
   if (!searchToggle || !searchOverlay || !searchInput || !searchForm) return;
 
   if (searchToggle.dataset.bound === "true") return;
@@ -32,9 +33,11 @@ export function initSearch({
     searchOverlay?.classList.add("hidden");
     document.body.classList.remove("overflow-hidden");
     searchToggle.setAttribute("aria-expanded", "false");
+    searchToggle?.focus();
   }
 
   searchToggle?.addEventListener("click", open);
+  searchClose?.addEventListener("click", close);
 
   searchInput?.addEventListener("input", (e) => {
     onInput?.(e.target.value ?? "");
