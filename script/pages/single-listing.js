@@ -182,7 +182,7 @@ function singleListingTemplate(listing) {
           
             <div class="mt-6 rounded-2xl border border-zinc-200 bg-white p-4">
                 <div class="flex items-center justify-between gap-4">
-                  <h2 class="text-sm text-white mb-3">
+                  <h2 class="text-base font-semibold text-zinc-900 mb-3">
                   Place a bid
                   </h2>
                   <span class="text-sm px-2 py-1 rounded-full border border-brand-700 bg-brand-600/20 text-black-900 font-semibold">
@@ -223,7 +223,7 @@ function singleListingTemplate(listing) {
                     </button>
                 </form>
 
-                <p id="bidMsg" class="text-sm mt-3"></p>
+                <p id="bidMsg" class="text-sm mt-3" role="status"></p>
 
                 <div class="mt-6">
                     <div class="flex items-center justify-between">
@@ -302,7 +302,7 @@ function initGallery(images) {
 
       thumb.classList.toggle("ring-2", active);
       thumb.classList.toggle("ring-zinc-800", active);
-      thumb.setAttribute("aria-current", active ? "true" : "false");
+      thumb.setAttribute("aria-pressed", active ? "true" : "false");
     });
 
     const disabled = images.length <= 1;
@@ -456,15 +456,26 @@ function initBidSubmit(listingId, listing) {
       await refreshProfile();
       updateNavUI();
 
-      msg.textContent = "Bid placed successfully!";
-      msg.classList.add("text-green-600");
-
       input.value = "";
 
       const res = await getListingsById(listingId);
       const fresh = res?.data ?? res;
 
       listingRoot.innerHTML = singleListingTemplate(fresh);
+
+      const updatedMsg = document.getElementById("bidMsg");
+
+      if (updatedMsg) {
+        updatedMsg.textContent = "Bid placed successfully!";
+        updatedMsg.classList.add("text-green-600");
+
+        setTimeout(() => {
+          if (updatedMsg) {
+            updatedMsg.textContent = "";
+            updatedMsg.classList.remove("text-green-600");
+          }
+        }, 3000);
+      }
 
       const images = (fresh?.media ?? []).map((m) => m.url).filter(Boolean);
       initGallery(images.length ? images : [FALLBACK_IMAGE]);
@@ -500,9 +511,7 @@ function initBidSubmit(listingId, listing) {
           initBidSubmit(listingId, fresh);
           return;
         }
-      } catch {
-        // ignore
-      }
+      } catch {}
       if (btn) btn.disabled = false;
     }
   });

@@ -426,7 +426,6 @@ form?.addEventListener("submit", async (e) => {
 
     setMsg("Listing created but no ID returned", "error");
   } catch (err) {
-    console.error("Error creating listing:", err);
     const message =
       err?.response?.data?.error?.message || err.message || "An error occurred";
     setMsg(`Error: ${message}`, "error");

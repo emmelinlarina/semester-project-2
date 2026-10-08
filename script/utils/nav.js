@@ -143,9 +143,23 @@ export function renderNav(mountId = "navMount", { enableSearch = true } = {}) {
             id="searchForm"
             class="w-[90%] max-w-lg rounded-3xl bg-white p-6 shadow-xl"
           >
-          <h2 id="searchTitle" class="sr-only">Search Listings</h2>
+        <div class="mb-4 flex items-center justify-between">
+          <h2 id="searchTitle" class="sr-only">
+            Search Listings
+          </h2>
+
+          <button
+            id="searchClose"
+            type="button"
+            class="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-zinc-700 hover:bg-zinc-100 transition focus-visible::outline-none focus-visible:ring-2 focus-visible:ring-brand-700"
+            aria-label="Close search"
+          >
+            <i class="fa-solid fa-xmark text-xl" aria-hidden="true"></i>
+          </button>
+        </div>
 
             <div class="flex items-center gap-3">
+            
             <label for="searchInput" class="sr-only">Search Listings</label>
               <input
                 type="search"
@@ -172,7 +186,7 @@ export function renderNav(mountId = "navMount", { enableSearch = true } = {}) {
         <!-- MOBILE MENU PANEL (UNDER ROW) -->
         <div
           id="mobileMenu"
-          class="hidden mt-3 rounded-xl border border-zinc-200 bg-white p-3"
+          class="hidden md:hidden mt-3 rounded-xl border border-zinc-200 bg-white p-3"
         >
           <!-- Logged OUT -->
           <div id="mobileLoggedOut">
@@ -226,10 +240,15 @@ export function initMobileMenu({
   const menuBtn = document.getElementById(menuBtnId);
   const mobileMenu = document.getElementById(mobileMenuId);
 
+  if (!menuBtn || !mobileMenu) return;
+
   menuBtn?.addEventListener("click", () => {
     const isOpen = !mobileMenu.classList.contains("hidden");
+
     mobileMenu.classList.toggle("hidden");
+
     menuBtn.setAttribute("aria-expanded", String(!isOpen));
+    menuBtn.setAttribute("aria-label", isOpen ? "Open menu" : "Close menu");
   });
 }
 
