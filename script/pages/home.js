@@ -374,7 +374,6 @@ async function loadListings() {
 
     updatePagerUI();
   } catch (err) {
-    console.error("Error loading listings:", err);
     if (galleryGrid) {
       galleryGrid.innerHTML = `<p class="text-sm text-red-600" role="alert">Error loading listings.</p>`;
       setBusy(galleryGrid, false);
