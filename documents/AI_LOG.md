@@ -10,7 +10,7 @@ Noroff Front-end Development
 - GitHub Copilot
 - ChatGPT
 
-## GitHub Copilot
+## GitHub Copilot 28 sept - 09 oct
 
 ### Purpose
 
@@ -18,26 +18,11 @@ GitHub Copilot was used for code autocomplete, guidance, rubber duck debugging, 
 
 Copilot's autocomplete feature helped speed up the coding process by suggesting and completing code while I worked.
 
-Topics discussed through Copilot Chat included:
-
-- Planning the refactoring of hardcoded HTML into JavaScript.
-- Debugging profile functionality, authentication, and editing auction listings.
-- Troubleshooting pagination and DOM rendering issues.
-- Understanding skeleton loading states and layout shifts.
-- Discussing Tailwind CSS, accessibility, and responsive styling.
-- Understanding Git commands and resolving development issues.
-
-I primarily used Copilot Chat to ask questions, understand errors, and explore possible solutions. In some cases, Copilot also identified issues and suggested or applied specific code changes.
-
 ### Outcome
-
-Using Copilot helped me better understand JavaScript functionality, DOM rendering, and how different parts of the application interact.
-
-The debugging conversations helped me identify possible causes of errors and approach problems more systematically. I also gained a better understanding of accessibility and responsive design considerations.
 
 Autocomplete made writing repetitive code more efficient, allowing me to focus more on understanding and implementing functionality.
 
-## ChatGPT
+## ChatGPT 08 - 09 Oct
 
 ### Purpose
 
